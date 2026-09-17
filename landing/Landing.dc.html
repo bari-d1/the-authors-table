@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <script src="./vendor/react.js"></script>
+<script src="./vendor/react-dom.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f5f5f7;
+      --text-primary: #1d1d1f;
+      --text-secondary: #6e6e73;
+      --accent-blue: #0071e3;
+      --accent-purple: #8b5cf6;
+      --accent-pink: #ff375f;
+      --border-color: rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
+      --shadow-lg: 0 12px 32px rgba(0,0,0,0.10);
+    }
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif; background: var(--bg-primary); color: var(--text-primary); }
+    a { color: {{accent}}; text-decoration: none; }
+    a:hover { color: var(--text-primary); }
+    .navlink:hover { color: var(--text-primary); }
+    .book-card { transition: transform 300ms cubic-bezier(0.4,0,0.2,1), box-shadow 300ms cubic-bezier(0.4,0,0.2,1); }
+    .book-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+    .btn-primary { transition: transform 200ms cubic-bezier(0.4,0,0.2,1), opacity 200ms; }
+    .btn-primary:hover { transform: scale(1.03); opacity: 0.92; }
+    .btn-ghost { transition: background 200ms; }
+    .btn-ghost:hover { background: rgba(255,255,255,0.28); }
+  </style>
+</helmet>
+
+<div style="width: 100%; min-height: 2080px; background: var(--bg-primary); display: flex; flex-direction: column; align-items: stretch;">
+
+  <!-- Header -->
+  <div style="width: 100%; box-sizing: border-box; padding: 20px 80px; display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 10;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="width: 30px; height: 30px; border-radius: 9px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple), var(--accent-pink));"></div>
+      <div style="font-size: 17px; font-weight: 600; letter-spacing: -0.01em;">Living Word</div>
+    </div>
+    <div style="display: flex; gap: 32px; align-items: center; font-size: 14px; font-weight: 500;">
+      <a href="#books" class="navlink" style="color: var(--text-secondary);">The Books</a>
+      <a href="#feel" class="navlink" style="color: var(--text-secondary);">How It Works</a>
+      <a href="#" class="btn-primary" style="padding: 9px 20px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); color: #ffffff; border-radius: 999px; font-weight: 600;">Get Notified</a>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <div style="width: 100%; box-sizing: border-box; padding: 120px 80px 100px 80px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 24px; background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 55%, var(--accent-pink) 100%);">
+    <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.85);">Launch Friday, Four New Books</div>
+    <h1 style="margin: 0; font-size: clamp(2.75rem, 4vw + 1rem, 4.75rem); line-height: 1.06; font-weight: 700; letter-spacing: -0.02em; color: #ffffff; max-width: 900px;">Read together. Talk it through. Pass it on.</h1>
+    <p style="margin: 0; font-size: 19px; line-height: 1.6; color: rgba(255,255,255,0.92); max-width: 620px;">One home for every book PJK is launching this Friday. Join the conversation on any chapter, ask questions, and turn a favourite line into something you can share.</p>
+    <div style="display: flex; gap: 14px; margin-top: 8px;">
+      <a href="#books" class="btn-primary" style="padding: 15px 30px; background: #ffffff; color: var(--accent-purple); border-radius: 999px; font-weight: 700; font-size: 15px;">Browse the books</a>
+      <a href="#feel" class="btn-ghost" style="padding: 15px 30px; background: rgba(255,255,255,0.16); border: 1px solid rgba(255,255,255,0.5); color: #ffffff; border-radius: 999px; font-weight: 600; font-size: 15px;">See how it works</a>
+    </div>
+  </div>
+
+  <!-- Book grid -->
+  <div id="books" style="width: 100%; box-sizing: border-box; padding: 96px 80px 88px 80px; display: flex; flex-direction: column; gap: 32px; background: var(--bg-primary);">
+    <div style="display: flex; flex-direction: column; gap: 8px; text-align: center;">
+      <h2 style="margin: 0; font-size: clamp(1.75rem, 2vw + 1rem, 2.5rem); font-weight: 700; letter-spacing: -0.01em;">This Friday's releases</h2>
+      <p style="margin: 0; font-size: 16px; color: var(--text-secondary);">Four books, one shared conversation.</p>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px;">
+      <sc-for list="{{books}}" as="book" hint-placeholder-count="4">
+        <div class="book-card" style="display: flex; flex-direction: column; background: #ffffff; border: 1px solid var(--border-color); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-md);">
+          <div style="width: 100%; height: 220px; background: {{book.cover}}; display: flex; align-items: flex-end; padding: 18px; box-sizing: border-box;">
+            <div style="color: #FFFFFF; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 6px 12px; background: rgba(255,255,255,0.22); backdrop-filter: blur(8px); border-radius: 999px;">{{book.tag}}</div>
+          </div>
+          <div style="padding: 22px; display: flex; flex-direction: column; gap: 10px; flex-grow: 1;">
+            <div style="font-size: 18px; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em;">{{book.title}}</div>
+            <div style="font-size: 14px; color: var(--text-secondary); line-height: 1.5; flex-grow: 1;">{{book.blurb}}</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; padding-top: 16px; border-top: 1px solid var(--border-color);">
+              <a href="../book-discussion/Thread.dc.html" style="font-size: 14px; font-weight: 600;">Join discussion →</a>
+              <span style="font-size: 13px; color: var(--text-secondary);">{{book.comments}} comments</span>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- How it works -->
+  <div id="feel" style="width: 100%; box-sizing: border-box; padding: 88px 80px; background: var(--bg-secondary); display: flex; flex-direction: column; gap: 44px;">
+    <h2 style="margin: 0; font-size: clamp(1.75rem, 2vw + 1rem, 2.5rem); font-weight: 700; letter-spacing: -0.01em; text-align: center;">Three things readers can do</h2>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px;">
+      <div style="display: flex; flex-direction: column; gap: 14px; background: #ffffff; border-radius: 18px; padding: 28px; box-shadow: var(--shadow-md);">
+        <div style="width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); display: flex; align-items: center; justify-content: center;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+        </div>
+        <div style="font-size: 18px; font-weight: 700; letter-spacing: -0.01em;">Discuss by chapter</div>
+        <div style="font-size: 14px; color: var(--text-secondary); line-height: 1.55;">Every book has its own thread. Comment on a chapter, ask questions, reply to other readers.</div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 14px; background: #ffffff; border-radius: 18px; padding: 28px; box-shadow: var(--shadow-md);">
+        <div style="width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink)); display: flex; align-items: center; justify-content: center;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+        </div>
+        <div style="font-size: 18px; font-weight: 700; letter-spacing: -0.01em;">Search any page</div>
+        <div style="font-size: 14px; color: var(--text-secondary); line-height: 1.55;">Looking for that one line about grace? Search across all four books and jump straight to it.</div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 14px; background: #ffffff; border-radius: 18px; padding: 28px; box-shadow: var(--shadow-md);">
+        <div style="width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, var(--accent-pink), #ff8a3d); display: flex; align-items: center; justify-content: center;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 15l4.5-4.5a2 2 0 0 1 2.8 0L15 15M14 14l1.5-1.5a2 2 0 0 1 2.8 0L21 15"></path></svg>
+        </div>
+        <div style="font-size: 18px; font-weight: 700; letter-spacing: -0.01em;">Share a quote</div>
+        <div style="font-size: 14px; color: var(--text-secondary); line-height: 1.55;">Pick a line, choose a background, and post a shareable image straight to your feed.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div style="width: 100%; box-sizing: border-box; padding: 36px 80px; display: flex; justify-content: space-between; align-items: center; color: var(--text-secondary); font-size: 13px; background: var(--bg-primary); border-top: 1px solid var(--border-color);">
+    <div>Living Word, Book Launch, [this Friday's date]</div>
+    <div>[Church name], [contact email]</div>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"accent":{"editor":"color","default":"#8B5CF6","options":["#0071E3","#8B5CF6","#FF375F","#30D158"]},"$preview":{"width":1440,"height":2080}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const accent = this.props.accent ?? '#8B5CF6';
+    return {
+      accent,
+      books: [
+        { title: 'Book One: [working title]', tag: 'New', blurb: '[One-line blurb about the book goes here.]', comments: 24, cover: 'linear-gradient(160deg, #0071e3, #8b5cf6)' },
+        { title: 'Book Two: [working title]', tag: 'New', blurb: '[One-line blurb about the book goes here.]', comments: 41, cover: 'linear-gradient(160deg, #8b5cf6, #ff375f)' },
+        { title: 'Book Three: [working title]', tag: 'New', blurb: '[One-line blurb about the book goes here.]', comments: 12, cover: 'linear-gradient(160deg, #ff375f, #ff8a3d)' },
+        { title: 'Book Four: [working title]', tag: 'New', blurb: '[One-line blurb about the book goes here.]', comments: 7, cover: 'linear-gradient(160deg, #30d158, #0071e3)' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

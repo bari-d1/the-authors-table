@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <script src="./vendor/react.js"></script>
+<script src="./vendor/react-dom.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f5f5f7;
+      --text-primary: #1d1d1f;
+      --text-secondary: #6e6e73;
+      --accent-blue: #0071e3;
+      --accent-purple: #8b5cf6;
+      --accent-pink: #ff375f;
+      --border-color: rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
+    }
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif; background: var(--bg-primary); color: var(--text-primary); }
+    a { color: {{accent}}; text-decoration: none; }
+    a:hover { color: var(--text-primary); }
+    input, textarea { font-family: inherit; }
+    input:focus, textarea:focus { outline: 2px solid {{accent}}; outline-offset: 1px; }
+    .comment-card { transition: box-shadow 200ms; }
+    .comment-card:hover { box-shadow: var(--shadow-md); }
+    .btn-primary { transition: transform 200ms cubic-bezier(0.4,0,0.2,1), opacity 200ms; }
+    .btn-primary:hover { transform: scale(1.03); opacity: 0.92; }
+    .swatch { transition: transform 150ms; cursor: pointer; }
+    .swatch:hover { transform: scale(1.12); }
+  </style>
+</helmet>
+
+<div style="width: 100%; min-height: 2020px; background: var(--bg-primary); display: flex; flex-direction: column;">
+
+  <!-- Header -->
+  <div style="width: 100%; box-sizing: border-box; padding: 20px 80px; display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 10;">
+    <a href="../landing/Landing.dc.html" style="font-size: 15px; font-weight: 600; color: var(--text-secondary);">← All books</a>
+    <div style="position: relative; width: 380px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%);"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+      <label for="pagesearch" style="position: absolute; left: -9999px;">Search this book</label>
+      <input id="pagesearch" type="text" placeholder="Search this book" style="width: 100%; box-sizing: border-box; padding: 11px 16px 11px 38px; border: 1px solid var(--border-color); border-radius: 999px; font-size: 14px; background: var(--bg-secondary);">
+    </div>
+  </div>
+
+  <!-- Book banner -->
+  <div style="width: 100%; box-sizing: border-box; padding: 40px 80px; display: flex; gap: 26px; align-items: center; background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));">
+    <div style="width: 76px; height: 100px; border-radius: 10px; background: linear-gradient(160deg, rgba(255,255,255,0.5), rgba(255,255,255,0.15)); flex-shrink: 0; box-shadow: var(--shadow-md);"></div>
+    <div style="display: flex; flex-direction: column; gap: 6px;">
+      <div style="font-size: 27px; font-weight: 700; letter-spacing: -0.01em; color: #ffffff;">Book One: [working title]</div>
+      <div style="font-size: 14px; color: rgba(255,255,255,0.85);">by PJK, 24 comments, 6 questions answered</div>
+    </div>
+  </div>
+
+  <!-- Body: thread + sidebar -->
+  <div style="width: 100%; box-sizing: border-box; padding: 44px 80px; display: grid; grid-template-columns: 2fr 1fr; gap: 40px; align-items: start;">
+
+    <!-- Thread -->
+    <div style="display: flex; flex-direction: column; gap: 18px;">
+      <div style="display: flex; gap: 10px;">
+        <div style="padding: 9px 18px; border-radius: 999px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); color: #ffffff; font-size: 13px; font-weight: 700;">All comments</div>
+        <div style="padding: 9px 18px; border-radius: 999px; background: var(--bg-secondary); color: var(--text-secondary); font-size: 13px; font-weight: 600;">Questions for the author</div>
+        <div style="padding: 9px 18px; border-radius: 999px; background: var(--bg-secondary); color: var(--text-secondary); font-size: 13px; font-weight: 600;">By chapter</div>
+      </div>
+
+      <sc-for list="{{comments}}" as="c" hint-placeholder-count="4">
+        <div class="comment-card" style="display: flex; gap: 14px; padding: 20px; background: #ffffff; border: 1px solid var(--border-color); border-radius: 16px;">
+          <div style="width: 40px; height: 40px; border-radius: 999px; background: {{c.color}}; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-size: 14px; font-weight: 700;">{{c.initial}}</div>
+          <div style="display: flex; flex-direction: column; gap: 6px; flex-grow: 1;">
+            <div style="display: flex; align-items: baseline; gap: 10px;">
+              <span style="font-weight: 700; font-size: 14px;">{{c.name}}</span>
+              <span style="font-size: 12px; color: var(--text-secondary);">{{c.chapter}}, {{c.time}}</span>
+            </div>
+            <div style="font-size: 14.5px; line-height: 1.55; color: var(--text-primary);">{{c.text}}</div>
+            <div style="display: flex; gap: 16px; margin-top: 2px;">
+              <span style="font-size: 12.5px; color: var(--text-secondary); font-weight: 600;">Reply</span>
+              <span style="font-size: 12.5px; color: var(--text-secondary); font-weight: 600;">♥ {{c.likes}}</span>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+
+      <div style="display: flex; gap: 12px; padding: 8px 8px 8px 20px; background: var(--bg-secondary); border-radius: 999px; margin-top: 8px; align-items: center;">
+        <label for="composer" style="position: absolute; left: -9999px;">Add a comment</label>
+        <input id="composer" type="text" placeholder="Ask a question or share a thought" style="flex-grow: 1; border: none; outline: none; font-size: 14px; background: transparent;">
+        <button type="button" class="btn-primary" style="padding: 11px 22px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); color: #ffffff; border: none; border-radius: 999px; font-weight: 700; font-size: 13.5px; cursor: pointer;">Post</button>
+      </div>
+    </div>
+
+    <!-- Sidebar: quote share -->
+    <div style="display: flex; flex-direction: column; gap: 16px; background: #ffffff; border: 1px solid var(--border-color); border-radius: 20px; padding: 24px; box-shadow: var(--shadow-md); position: sticky; top: 96px;">
+      <div style="font-size: 17px; font-weight: 700; letter-spacing: -0.01em;">Turn a line into a share</div>
+      <div style="aspect-ratio: 4 / 5; width: 100%; border-radius: 14px; background: linear-gradient(160deg, var(--accent-blue), var(--accent-purple), var(--accent-pink)); display: flex; align-items: center; justify-content: center; padding: 24px; box-sizing: border-box;">
+        <div style="color: #FFFFFF; text-align: center; font-size: 18px; line-height: 1.45; font-weight: 600;">"[Selected line from the book appears here.]"</div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <label for="quotetext" style="font-size: 12.5px; font-weight: 600; color: var(--text-secondary);">Quote</label>
+        <textarea id="quotetext" rows="2" placeholder="Paste or type a line" style="width: 100%; box-sizing: border-box; padding: 11px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 13.5px; resize: none; background: var(--bg-secondary);"></textarea>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <span style="font-size: 12.5px; font-weight: 600; color: var(--text-secondary);">Background</span>
+        <div style="display: flex; gap: 10px;">
+          <sc-for list="{{swatches}}" as="s" hint-placeholder-count="4">
+            <button type="button" class="swatch" aria-label="{{s.label}}" style="width: 32px; height: 32px; border-radius: 10px; background: {{s.color}}; border: 2px solid #FFFFFF; box-shadow: 0 0 0 1px var(--border-color); padding: 0;"></button>
+          </sc-for>
+        </div>
+      </div>
+      <button type="button" class="btn-primary" style="padding: 13px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); color: #ffffff; border: none; border-radius: 999px; font-weight: 700; font-size: 14px; cursor: pointer;">Download and share</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"accent":{"editor":"color","default":"#8B5CF6","options":["#0071E3","#8B5CF6","#FF375F","#30D158"]},"$preview":{"width":1440,"height":2020}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const accent = this.props.accent ?? '#8B5CF6';
+    return {
+      accent,
+      comments: [
+        { initial: 'M', name: '[Reader name]', chapter: 'Chapter 2', time: '2h ago', text: '[Sample comment: a reader reacting to a chapter or asking a question goes here.]', likes: 6, color: '#0071e3' },
+        { initial: 'D', name: '[Reader name]', chapter: 'Chapter 4', time: '5h ago', text: '[Sample question for the author goes here.]', likes: 3, color: '#30d158' },
+        { initial: 'K', name: '[Reader name]', chapter: 'Introduction', time: '1d ago', text: '[Sample comment goes here.]', likes: 11, color: '#ff375f' },
+        { initial: 'P', name: 'PJK', chapter: 'Chapter 4', time: '20h ago', text: '[Sample author reply to a reader question goes here.]', likes: 18, color: '#8b5cf6' },
+      ],
+      swatches: [
+        { color: '#0071e3', label: 'Blue' },
+        { color: '#8b5cf6', label: 'Purple' },
+        { color: '#ff375f', label: 'Pink' },
+        { color: '#30d158', label: 'Green' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
