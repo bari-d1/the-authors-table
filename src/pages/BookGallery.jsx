@@ -1,34 +1,10 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Layout from '../components/Layout'
 import PillButton from '../components/PillButton'
-import { supabase } from '../lib/supabaseClient'
+import { useBooks } from '../hooks/useBooks'
 
 function BookGallery() {
-  const [books, setBooks] = useState(null)
-  const [error, setError] = useState(null)
-
-  useEffect(() => {
-    let cancelled = false
-
-    async function loadBooks() {
-      const { data, error: fetchError } = await supabase.from('books').select('*')
-
-      if (cancelled) return
-
-      if (fetchError) {
-        setError(fetchError.message)
-      } else {
-        setBooks(data)
-      }
-    }
-
-    loadBooks()
-
-    return () => {
-      cancelled = true
-    }
-  }, [])
+  const { books, error } = useBooks()
 
   if (error) {
     return (
