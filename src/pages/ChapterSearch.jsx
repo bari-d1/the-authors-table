@@ -6,6 +6,7 @@ import ChapterSelector from '../components/ChapterSelector'
 import Layout from '../components/Layout'
 import QuotableText from '../components/QuotableText'
 import QuoteBackgroundPicker from '../components/QuoteBackgroundPicker'
+import QuoteCardCanvas from '../components/QuoteCardCanvas'
 import QuoteFreeTextInput from '../components/QuoteFreeTextInput'
 import { capQuote } from '../lib/capQuote'
 import { useBooks } from '../hooks/useBooks'
@@ -148,6 +149,13 @@ function ChapterSearch() {
           <p className="mt-2 truncate font-body text-xs text-ink-muted">
             Selected background: {selectedBackgroundUrl ?? 'none'}
           </p>
+
+          <h3 className="mb-2 mt-5 font-body text-sm font-medium text-ink">Preview</h3>
+          <QuoteCardCanvas
+            quote={selectedQuote}
+            backgroundUrl={selectedBackgroundUrl}
+            attribution={selectedBook ? `${selectedBook.title} · by PJK` : null}
+          />
         </div>
 
         <div className="mt-6">
