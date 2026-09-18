@@ -1,4 +1,5 @@
 import Fuse from 'fuse.js'
+import { buildExcerpt } from './buildExcerpt'
 import { splitIntoParagraphs } from './splitIntoParagraphs'
 
 // Tuned for fuzzy matching against paragraph/sentence units rather than
@@ -12,6 +13,7 @@ import { splitIntoParagraphs } from './splitIntoParagraphs'
 const FUSE_OPTIONS = {
   keys: ['text'],
   includeScore: true,
+  includeMatches: true,
   ignoreLocation: true,
   threshold: 0.4,
   minMatchCharLength: 3,
@@ -36,10 +38,14 @@ export function createChapterSearch(content) {
     return fuse
       .search(query.trim())
       .filter((result) => result.score <= FUSE_OPTIONS.threshold)
-      .map((result) => ({
-        paragraph: result.item,
-        score: result.score,
-      }))
+      .map((result) => {
+        const ranges = result.matches?.find((match) => match.key === 'text')?.indices ?? []
+        return {
+          paragraph: result.item,
+          score: result.score,
+          excerpt: buildExcerpt(result.item.text, ranges),
+        }
+      })
   }
 
   return { paragraphs, search }

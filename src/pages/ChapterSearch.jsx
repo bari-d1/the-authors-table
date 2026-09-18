@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react'
 import BookSelector from '../components/BookSelector'
+import ChapterSearchBox from '../components/ChapterSearchBox'
 import ChapterSelector from '../components/ChapterSelector'
 import Layout from '../components/Layout'
 import { useBooks } from '../hooks/useBooks'
 import { useChapterContent } from '../hooks/useChapterContent'
 import { useChapters } from '../hooks/useChapters'
 
-// Scaffold for the chapter search feature. Owns the book + chapter
-// selection, and the selected chapter's fetched content, today; the search
-// box lands here next, searching against that same content.
+// Chapter search: pick a book, pick a chapter, search its text.
 function ChapterSearch() {
   const [selectedBookId, setSelectedBookId] = useState(null)
   const [selectedChapterId, setSelectedChapterId] = useState(null)
@@ -64,6 +63,14 @@ function ChapterSearch() {
                 ? 'Loading…'
                 : `loaded, ${chapterContent.length} characters`}
         </p>
+
+        <div className="mt-6">
+          <ChapterSearchBox
+            chapterId={selectedChapterId}
+            chapterContent={chapterContent}
+            contentError={contentError}
+          />
+        </div>
       </div>
     </Layout>
   )
