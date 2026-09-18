@@ -1,3 +1,8 @@
+import Dialog from '@mui/material/Dialog'
+import DialogContent from '@mui/material/DialogContent'
+import DialogTitle from '@mui/material/DialogTitle'
+import IconButton from '@mui/material/IconButton'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Layout from '../components/Layout'
 import PillButton from '../components/PillButton'
@@ -5,6 +10,10 @@ import { useBooks } from '../hooks/useBooks'
 
 function BookGallery() {
   const { books, error } = useBooks()
+  // The book whose full blurb is open in the modal, or null. Just the id
+  // is enough since `books` already holds everything else needed to look
+  // it back up when rendering the dialog.
+  const [expandedBookId, setExpandedBookId] = useState(null)
 
   if (error) {
     return (
@@ -40,6 +49,8 @@ function BookGallery() {
     )
   }
 
+  const expandedBook = books.find((book) => book.id === expandedBookId) ?? null
+
   return (
     <Layout>
       <div className="mx-auto max-w-5xl px-6 py-20">
@@ -62,9 +73,18 @@ function BookGallery() {
               <div className="flex flex-1 flex-col gap-3 pt-6">
                 <h2 className="font-heading text-2xl font-semibold text-ink">{book.title}</h2>
                 {book.blurb && (
-                  <p className="line-clamp-4 font-body text-sm leading-relaxed text-ink-muted">
-                    {book.blurb}
-                  </p>
+                  <>
+                    <p className="line-clamp-4 font-body text-sm leading-relaxed text-ink-muted">
+                      {book.blurb}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setExpandedBookId(book.id)}
+                      className="label-tracked self-start text-[11px] text-teal hover:text-ink"
+                    >
+                      Read more
+                    </button>
+                  </>
                 )}
                 <div className="mt-2 flex flex-wrap gap-3">
                   <PillButton as={Link} to={`/book/${book.id}`} variant="primary">
@@ -87,6 +107,24 @@ function BookGallery() {
           ))}
         </div>
       </div>
+
+      <Dialog open={expandedBook !== null} onClose={() => setExpandedBookId(null)} maxWidth="sm" fullWidth>
+        {expandedBook && (
+          <>
+            <DialogTitle>{expandedBook.title}</DialogTitle>
+            <DialogContent>
+              <p className="font-body text-sm leading-relaxed text-ink-muted">{expandedBook.blurb}</p>
+            </DialogContent>
+            <IconButton
+              aria-label="Close"
+              onClick={() => setExpandedBookId(null)}
+              sx={{ position: 'absolute', right: 12, top: 12, color: 'inherit' }}
+            >
+              ✕
+            </IconButton>
+          </>
+        )}
+      </Dialog>
     </Layout>
   )
 }
