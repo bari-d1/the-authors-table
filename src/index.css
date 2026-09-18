@@ -12,6 +12,11 @@
   --color-teal: #1f3b38;
   --color-border: #e5e5e5;
 
+  /* A true light teal tint for highlight backgrounds - teal at low
+     opacity over white reads as gray, not as a color, so this is its
+     own token rather than an opacity modifier on --color-teal. */
+  --color-teal-tint: #cdeae3;
+
   /* Not in the original palette spec - needed for form errors/warnings.
      A muted brick red, not a saturated alert red, to stay in the same
      restrained editorial register as the rest of the palette. */

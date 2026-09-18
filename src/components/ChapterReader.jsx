@@ -46,7 +46,7 @@ function ChapterReader({ chapterContent, highlightedIndex }) {
           key={paragraph.index}
           id={`chapter-paragraph-${paragraph.index}`}
           className={`-mx-3 mb-5 scroll-mt-8 rounded-md px-3 py-1.5 font-body text-base leading-loose text-ink transition-colors duration-500 last:mb-0 ${
-            highlightedIndex === paragraph.index ? 'bg-teal/20' : 'bg-transparent'
+            highlightedIndex === paragraph.index ? 'bg-teal-tint' : 'bg-transparent'
           }`}
         >
           {paragraph.text}

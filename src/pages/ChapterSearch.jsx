@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import BookSelector from '../components/BookSelector'
 import ChapterReader from '../components/ChapterReader'
 import ChapterSearchBox from '../components/ChapterSearchBox'
@@ -29,6 +29,7 @@ function ChapterSearch() {
   const [quoteSourceBookId, setQuoteSourceBookId] = useState(null)
   const [quoteSourceChapterId, setQuoteSourceChapterId] = useState(null)
   const [selectedBackgroundUrl, setSelectedBackgroundUrl] = useState(null)
+  const previewSectionRef = useRef(null)
   const { books } = useBooks()
   const { content: chapterContent, error: contentError } = useChapterContent(selectedChapterId)
 
@@ -72,6 +73,10 @@ function ChapterSearch() {
     )
     setQuoteSourceBookId(selectedBookId)
     setQuoteSourceChapterId(selectedChapterId)
+    // The picker/preview sits below the passage, off-screen at the point
+    // the reader taps "Share this quote" - bring it into view rather than
+    // leaving them to notice it updated and scroll down themselves.
+    previewSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   const handleBackgroundChange = (url) => {
@@ -112,14 +117,10 @@ function ChapterSearch() {
           </QuotableText>
         </div>
 
-        <div className="mt-10 rounded-sharp border border-border bg-white p-5">
-          <h2 className="mb-3 font-heading text-lg font-bold text-ink">Your quote</h2>
-          <div className="min-h-22 rounded-sharp border border-border bg-white p-3 font-body text-sm text-ink">
-            {selectedQuote || <span className="text-ink-muted">Nothing selected yet.</span>}
-          </div>
-          {quoteNotice && <p className="mt-2 font-body text-sm text-error">{quoteNotice}</p>}
+        <div ref={previewSectionRef} className="mt-10 scroll-mt-8 rounded-sharp border border-border bg-white p-5">
+          {quoteNotice && <p className="mb-3 font-body text-sm text-error">{quoteNotice}</p>}
 
-          <h3 className="mb-2 mt-5 font-body text-sm font-medium text-ink">Background</h3>
+          <h3 className="mb-2 font-body text-sm font-medium text-ink">Background</h3>
           <QuoteBackgroundPicker value={selectedBackgroundUrl} onChange={handleBackgroundChange} />
 
           <h3 className="mb-2 mt-5 font-body text-sm font-medium text-ink">Preview</h3>

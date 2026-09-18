@@ -13,7 +13,7 @@ function Excerpt({ excerpt }) {
       {excerpt.leadingEllipsis && '… '}
       {excerpt.segments.map((segment, i) =>
         segment.highlight ? (
-          <mark key={i} className="rounded bg-teal/20 px-0.5 font-semibold text-ink">
+          <mark key={i} className="rounded bg-teal-tint px-0.5 font-semibold text-ink">
             {segment.text}
           </mark>
         ) : (
