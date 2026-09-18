@@ -98,6 +98,20 @@ Write-only from the public site. One row inserted per quote card download. Exist
 
 Content for `author`, `books`, and `chapters` goes in at import time (manually, or via the PDF import script), never through the public site.
 
+## Storage buckets
+
+Two public Supabase Storage buckets, both provisioned via migration (`supabase/migrations/20260918005636_create_storage_buckets.sql`), not the dashboard, so the config is version-controlled:
+
+| Bucket | Purpose | Public read | Public upload | Size limit | Allowed MIME types |
+|---|---|---|---|---|---|
+| `book-assets` | Book covers, PJK's author photo | Yes | No | 5 MB | `image/png`, `image/jpeg`, `image/webp` |
+| `quote-backgrounds` | Quote-card background templates | Yes | No | 5 MB | `image/png`, `image/jpeg`, `image/webp` |
+
+Both are marked `public = true`, so objects are readable at their public URL (`/storage/v1/object/public/<bucket>/<path>`) without an auth header. Uploads are a separate concern: `storage.objects` has row-level security enabled by default, and no INSERT policy is created for `anon` or `authenticated` on either bucket, so uploads are rejected for both. These are curated assets, not user-generated content, so the only way to add or replace a file is:
+
+- Through the Supabase dashboard (Storage → bucket → Upload), or
+- Via a service-role connection (e.g. a one-off script or the PDF import pipeline), never from frontend code.
+
 ## Metrics
 
 The admin dashboard shows live counts, computed as grouped queries against `comments` and `quote_cards` on every page load. There is deliberately no separate metrics/counters table, since at this scale a stored counter is more likely to drift out of sync than to save anything meaningful in query time.
