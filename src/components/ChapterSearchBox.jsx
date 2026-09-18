@@ -28,7 +28,7 @@ function Excerpt({ excerpt }) {
 // Search within whatever chapter is currently loaded. Hidden/disabled until
 // a book and chapter are both selected upstream, since there's no content
 // to search without a loaded chapter.
-function ChapterSearchBox({ chapterId, chapterContent, contentError }) {
+function ChapterSearchBox({ chapterId, chapterContent, contentError, onResultClick }) {
   const [query, setQuery] = useState('')
   const debouncedQuery = useDebouncedValue(query, DEBOUNCE_MS)
   const { search } = useChapterSearch(chapterContent)
@@ -72,11 +72,14 @@ function ChapterSearchBox({ chapterId, chapterContent, contentError }) {
       {results.length > 0 && (
         <ul className="mt-3 flex flex-col gap-2">
           {results.map((result) => (
-            <li
-              key={result.paragraph.index}
-              className="rounded-lg border border-border bg-surface px-3 py-2 font-body text-sm leading-relaxed text-ink"
-            >
-              <Excerpt excerpt={result.excerpt} />
+            <li key={result.paragraph.index}>
+              <button
+                type="button"
+                onClick={() => onResultClick?.(result.paragraph.index)}
+                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-left font-body text-sm leading-relaxed text-ink transition-colors hover:border-gold hover:bg-paper focus:outline-none focus:ring-1 focus:ring-gold"
+              >
+                <Excerpt excerpt={result.excerpt} />
+              </button>
             </li>
           ))}
         </ul>
