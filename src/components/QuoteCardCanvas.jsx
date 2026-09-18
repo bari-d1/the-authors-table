@@ -104,6 +104,32 @@ function drawRoundedRect(ctx, x, y, width, height, radius) {
   ctx.closePath()
 }
 
+// Shared by both the Download and Share actions, so they always produce
+// identical output rather than each generating the image its own way.
+function canvasToBlob(canvas) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((result) => {
+      if (result) resolve(result)
+      else reject(new Error('Canvas produced no image data'))
+    }, 'image/png')
+  })
+}
+
+// Static capability check, not tied to any particular image: most desktop
+// browsers support navigator.share for URLs/text but not `files`, which is
+// what canShare({ files }) specifically tests. A tiny throwaway file is
+// enough to answer the question once per session; the actual share later
+// re-checks with the real file as defense in depth.
+function canShareFiles() {
+  if (typeof navigator === 'undefined' || !navigator.canShare) return false
+  try {
+    const testFile = new File([new Uint8Array([0])], 'test.png', { type: 'image/png' })
+    return navigator.canShare({ files: [testFile] })
+  } catch {
+    return false
+  }
+}
+
 // Renders the quote-share image: selected background (cover-fit) + a dark
 // scrim sized to the text block + the quote (display font) + a smaller
 // attribution line (body font). Re-renders whenever quote, backgroundUrl,
@@ -111,12 +137,16 @@ function drawRoundedRect(ctx, x, y, width, height, radius) {
 function QuoteCardCanvas({ quote, backgroundUrl, attribution, bookTitle, bookId, chapterId }) {
   const canvasRef = useRef(null)
   const [isDownloading, setIsDownloading] = useState(false)
-  // A ref, not just the state above: state updates are batched/async, so
-  // two clicks dispatched before React re-renders (a fast real double-click
-  // can land inside that window) would both still read isDownloading as
-  // false from the same stale render. The ref reads/writes synchronously,
-  // so the second call sees the first one's guard immediately.
+  const [isSharing, setIsSharing] = useState(false)
+  const [shareError, setShareError] = useState(null)
+  const [shareSupported] = useState(canShareFiles)
+  // Refs, not just the state above: state updates are batched/async, so two
+  // clicks dispatched before React re-renders (a fast real double-click can
+  // land inside that window) would both still read the stale false value
+  // from the same render. The refs read/write synchronously, so the second
+  // call sees the first one's guard immediately.
   const isDownloadingRef = useRef(false)
+  const isSharingRef = useRef(false)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -229,12 +259,7 @@ function QuoteCardCanvas({ quote, backgroundUrl, attribution, bookTitle, bookId,
     isDownloadingRef.current = true
     setIsDownloading(true)
     try {
-      const blob = await new Promise((resolve, reject) => {
-        canvas.toBlob((result) => {
-          if (result) resolve(result)
-          else reject(new Error('Canvas produced no image data'))
-        }, 'image/png')
-      })
+      const blob = await canvasToBlob(canvas)
 
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
@@ -262,6 +287,42 @@ function QuoteCardCanvas({ quote, backgroundUrl, attribution, bookTitle, bookId,
     }
   }
 
+  async function handleShare() {
+    if (isSharingRef.current) return
+
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    isSharingRef.current = true
+    setIsSharing(true)
+    setShareError(null)
+    try {
+      const blob = await canvasToBlob(canvas)
+      const file = new File([blob], buildQuoteFilename(bookTitle), { type: 'image/png' })
+
+      // Re-checked here with the real file, not just the button's static
+      // visibility check, as defense in depth.
+      if (!navigator.canShare({ files: [file] })) {
+        throw new Error('File sharing is not supported in this browser')
+      }
+
+      await navigator.share({
+        files: [file],
+        title: attribution || "A quote from The Author's Table",
+      })
+    } catch (err) {
+      // The reader dismissing the native share sheet throws AbortError -
+      // a normal cancellation, not a failure, so it gets no message at all.
+      if (err?.name !== 'AbortError') {
+        console.error('QuoteCardCanvas: share failed', err)
+        setShareError("Couldn't share right now. Try downloading instead.")
+      }
+    } finally {
+      isSharingRef.current = false
+      setIsSharing(false)
+    }
+  }
+
   return (
     <div>
       <canvas
@@ -270,7 +331,7 @@ function QuoteCardCanvas({ quote, backgroundUrl, attribution, bookTitle, bookId,
         height={CANVAS_HEIGHT}
         className="mx-auto w-full max-w-xs rounded-2xl border border-border shadow-md"
       />
-      <div className="mt-4 flex justify-center">
+      <div className="mt-4 flex justify-center gap-3">
         <PillButton
           type="button"
           variant="primary"
@@ -279,7 +340,20 @@ function QuoteCardCanvas({ quote, backgroundUrl, attribution, bookTitle, bookId,
         >
           {isDownloading ? 'Preparing…' : 'Download'}
         </PillButton>
+        {shareSupported && (
+          <PillButton
+            type="button"
+            variant="primary"
+            onClick={handleShare}
+            disabled={!hasQuote || isSharing}
+          >
+            {isSharing ? 'Preparing…' : 'Share'}
+          </PillButton>
+        )}
       </div>
+      {shareError && (
+        <p className="mt-2 text-center font-body text-sm text-tag-plum">{shareError}</p>
+      )}
     </div>
   )
 }
