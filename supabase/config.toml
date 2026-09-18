@@ -419,3 +419,9 @@ enabled = true
 # holding a Supabase auth JWT, so JWT verification is disabled for this
 # function specifically.
 verify_jwt = false
+
+[functions.notify-reader-of-reply]
+# Invoked by a Database Webhook (server-to-server), not a browser session
+# holding a Supabase auth JWT, so JWT verification is disabled for this
+# function specifically.
+verify_jwt = false
