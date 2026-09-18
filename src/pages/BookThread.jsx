@@ -86,7 +86,7 @@ function BookThread() {
     return (
       <Layout>
         <div className="mx-auto max-w-4xl px-6 py-16">
-          <p className="rounded-2xl border border-border bg-surface px-6 py-8 text-center font-body text-ink">
+          <p className="rounded-sharp border border-border bg-white px-6 py-8 text-center font-body text-ink">
             Something went wrong loading this book: {error}
           </p>
         </div>
@@ -118,18 +118,18 @@ function BookThread() {
             <img
               src={book.cover_url}
               alt={`Cover of ${book.title}`}
-              className="w-40 shrink-0 rounded-xl border border-border object-cover sm:w-48"
+              className="w-40 shrink-0 border border-border object-cover sm:w-48"
             />
           )}
           <div className="flex flex-col gap-2">
-            <h1 className="font-display text-3xl font-bold text-ink">{book.title}</h1>
+            <h1 className="font-heading text-3xl font-bold text-ink">{book.title}</h1>
             {author && <p className="font-body text-ink-muted">by {author.name}</p>}
           </div>
         </section>
 
         {/* Author section, visually distinct from the banner above */}
         {author && (
-          <section className="mt-10 flex flex-col items-center gap-4 rounded-2xl border border-border bg-surface p-6 text-center sm:flex-row sm:items-center sm:gap-6 sm:text-left">
+          <section className="mt-10 flex flex-col items-center gap-4 rounded-sharp border border-border bg-white p-6 text-center sm:flex-row sm:items-center sm:gap-6 sm:text-left">
             {author.photo_url && (
               <img
                 src={author.photo_url}
@@ -138,7 +138,7 @@ function BookThread() {
               />
             )}
             <div className="flex flex-col gap-1">
-              <p className="font-display text-base font-bold text-ink">{author.name}</p>
+              <p className="font-heading text-base font-bold text-ink">{author.name}</p>
               {author.bio && <p className="font-body text-sm text-ink-muted">{author.bio}</p>}
             </div>
           </section>
@@ -146,7 +146,7 @@ function BookThread() {
 
         {/* Discussion */}
         <section className="mt-10">
-          <h2 className="mb-4 font-display text-xl font-bold text-ink">Discussion</h2>
+          <h2 className="mb-4 font-heading text-xl font-bold text-ink">Discussion</h2>
           <div className="mb-6">
             <CommentComposer parentId={null} onSubmit={handleCommentSubmit} />
           </div>

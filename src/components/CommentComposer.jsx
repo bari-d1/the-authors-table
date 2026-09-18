@@ -79,13 +79,13 @@ function CommentComposer({ parentId = null, onSubmit, submitLabel = 'Post commen
   const counterIsWarning = remaining <= COUNTER_WARNING_THRESHOLD
 
   const fieldClasses =
-    'w-full rounded-lg border border-border bg-paper p-3 font-body text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-1 focus:ring-gold disabled:opacity-60'
+    'w-full rounded-lg border border-border bg-white p-3 font-body text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-1 focus:ring-black disabled:opacity-60'
 
   return (
     <form
       onSubmit={handleSubmit}
       noValidate
-      className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4"
+      className="flex flex-col gap-3 rounded-sharp border border-border bg-white p-4"
     >
       <div>
         <textarea
@@ -100,7 +100,7 @@ function CommentComposer({ parentId = null, onSubmit, submitLabel = 'Post commen
         />
         <div
           className={`mt-1 text-right font-body text-xs ${
-            counterIsWarning ? 'text-tag-plum' : 'text-ink-muted'
+            counterIsWarning ? 'text-error' : 'text-ink-muted'
           }`}
         >
           {form.content.length} / {CONTENT_MAX_LENGTH}
@@ -139,7 +139,7 @@ function CommentComposer({ parentId = null, onSubmit, submitLabel = 'Post commen
         />
       )}
 
-      {error && <p className="font-body text-sm text-tag-plum">{error}</p>}
+      {error && <p className="font-body text-sm text-error">{error}</p>}
 
       <div>
         <PillButton type="submit" variant="primary" disabled={submitting}>

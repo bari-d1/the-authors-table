@@ -1,10 +1,10 @@
 function Footer() {
   return (
-    <footer className="border-t border-border bg-surface">
-      <div className="mx-auto flex max-w-6xl flex-col items-center gap-1 px-6 py-6 text-center font-body text-xs text-ink-muted sm:flex-row sm:justify-between sm:text-left">
-        <p>The Author&apos;s Table</p>
-        <p>Launching Spring 2026</p>
-        <p>hello@theauthorstable.com</p>
+    <footer className="bg-black">
+      <div className="mx-auto flex max-w-6xl flex-col items-center gap-2 px-6 py-8 text-center sm:flex-row sm:justify-between sm:text-left">
+        <p className="label-tracked text-xs text-white/70">The Author&apos;s Table</p>
+        <p className="label-tracked text-xs text-white/70">Launching Spring 2026</p>
+        <p className="label-tracked text-xs text-white/70">hello@theauthorstable.com</p>
       </div>
     </footer>
   )

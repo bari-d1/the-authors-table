@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabaseClient'
 import PillButton from './PillButton'
 
 const fieldClasses =
-  'w-full rounded-lg border border-border bg-paper p-3 font-body text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-1 focus:ring-gold disabled:opacity-60'
+  'w-full rounded-sharp border border-border bg-white p-3 font-body text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-1 focus:ring-black disabled:opacity-60'
 
 // Single shared admin account, not self-registration - no sign-up flow
 // here, just email + password against the account created directly via the
@@ -37,11 +37,11 @@ function AdminLoginForm() {
 
   return (
     <div className="mx-auto max-w-sm px-6 py-24">
-      <h1 className="mb-6 text-center font-display text-2xl font-bold text-ink">Admin login</h1>
+      <h1 className="mb-6 text-center font-heading text-3xl font-semibold text-ink">Admin login</h1>
       <form
         onSubmit={handleSubmit}
         noValidate
-        className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-5"
+        className="flex flex-col gap-3 border border-border bg-white p-6"
       >
         <input
           type="email"
@@ -63,7 +63,7 @@ function AdminLoginForm() {
           autoComplete="current-password"
           className={fieldClasses}
         />
-        {error && <p className="font-body text-sm text-tag-plum">{error}</p>}
+        {error && <p className="font-body text-sm text-error">{error}</p>}
         <PillButton type="submit" variant="primary" disabled={submitting}>
           {submitting ? 'Signing in…' : 'Log in'}
         </PillButton>

@@ -1,23 +1,38 @@
 @import 'tailwindcss';
 
 @theme {
-  --color-paper: #f6f2e9;
-  --color-surface: #fdfbf6;
-  --color-ink: #1b1815;
-  --color-ink-muted: #6b6357;
-  --color-gold: #a9762f;
-  --color-tag-olive: #5c6b3f;
-  --color-tag-slate: #3e5a6b;
-  --color-tag-plum: #5c3e52;
-  --color-border: #e5dfd0;
+  /* Editorial monochrome palette, matching joshuakomolafe.com's brand
+     language: black/white/ink carry the whole site, teal is the one
+     accent, used sparingly (pull-quotes, highlight panels), never as a
+     primary color. */
+  --color-black: #0f0f0f;
+  --color-white: #ffffff;
+  --color-ink: #1a1a1a;
+  --color-ink-muted: #4a4a4a;
+  --color-teal: #1f3b38;
+  --color-border: #e5e5e5;
 
-  --font-display: 'Space Grotesk', sans-serif;
-  --font-body: Inter, sans-serif;
+  /* Not in the original palette spec - needed for form errors/warnings.
+     A muted brick red, not a saturated alert red, to stay in the same
+     restrained editorial register as the rest of the palette. */
+  --color-error: #a33d33;
 
-  --radius-pill: 999px;
+  --font-heading: 'Cormorant Garamond', serif;
+  --font-label: 'Cormorant Garamond', serif;
+  --font-body: 'Source Serif 4', serif;
+
+  /* Sharp, not pill-shaped - 2-4px everywhere a radius is used at all. */
+  --radius-sharp: 3px;
 }
 
 body {
   margin: 0;
-  @apply bg-paper font-body text-ink;
+  @apply bg-white font-body text-ink;
+}
+
+/* The signature wide-tracked uppercase treatment for nav items, button
+   labels, and section labels - anything set in the label font in an
+   uppercase context. */
+.label-tracked {
+  @apply font-label uppercase tracking-widest;
 }

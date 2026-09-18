@@ -63,13 +63,13 @@ function ChapterReader({ chapterContent, highlightedIndex, onScrolledIntoView })
   if (!chapterContent) return null
 
   return (
-    <div className="rounded-2xl border border-border bg-surface px-6 py-10 sm:px-12 sm:py-14">
+    <div className="rounded-sharp border border-border bg-white px-6 py-10 sm:px-12 sm:py-14">
       {paragraphs.map((paragraph) => (
         <p
           key={paragraph.index}
           id={`chapter-paragraph-${paragraph.index}`}
           className={`-mx-3 mb-5 scroll-mt-8 rounded-md px-3 py-1.5 font-body text-base leading-loose text-ink transition-colors duration-1000 last:mb-0 ${
-            highlightedIndex === paragraph.index ? 'bg-gold/25' : 'bg-transparent'
+            highlightedIndex === paragraph.index ? 'bg-teal/20' : 'bg-transparent'
           }`}
         >
           {paragraph.text}

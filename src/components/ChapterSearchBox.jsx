@@ -5,7 +5,7 @@ import { useDebouncedValue } from '../hooks/useDebouncedValue'
 const DEBOUNCE_MS = 250
 
 const PLACEHOLDER_CLASSES =
-  'rounded-lg border border-border bg-surface px-3 py-2 font-body text-sm text-ink-muted'
+  'rounded-lg border border-border bg-white px-3 py-2 font-body text-sm text-ink-muted'
 
 function Excerpt({ excerpt }) {
   return (
@@ -13,7 +13,7 @@ function Excerpt({ excerpt }) {
       {excerpt.leadingEllipsis && '… '}
       {excerpt.segments.map((segment, i) =>
         segment.highlight ? (
-          <mark key={i} className="rounded bg-gold/25 px-0.5 font-semibold text-ink">
+          <mark key={i} className="rounded bg-teal/20 px-0.5 font-semibold text-ink">
             {segment.text}
           </mark>
         ) : (
@@ -60,7 +60,7 @@ function ChapterSearchBox({ chapterId, chapterContent, contentError, onResultCli
         value={query}
         onChange={(event) => setQuery(event.target.value)}
         placeholder="Search this chapter…"
-        className="w-full rounded-lg border border-border bg-paper p-3 font-body text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-1 focus:ring-gold"
+        className="w-full rounded-lg border border-border bg-white p-3 font-body text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-1 focus:ring-black"
       />
 
       {hasSearched && results.length === 0 && (
@@ -76,7 +76,7 @@ function ChapterSearchBox({ chapterId, chapterContent, contentError, onResultCli
               <button
                 type="button"
                 onClick={() => onResultClick?.(result.paragraph.index)}
-                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-left font-body text-sm leading-relaxed text-ink transition-colors hover:border-gold hover:bg-paper focus:outline-none focus:ring-1 focus:ring-gold"
+                className="w-full rounded-lg border border-border bg-white px-3 py-2 text-left font-body text-sm leading-relaxed text-ink transition-colors hover:border-teal hover:bg-black/5 focus:outline-none focus:ring-1 focus:ring-black"
               >
                 <Excerpt excerpt={result.excerpt} />
               </button>

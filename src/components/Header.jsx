@@ -2,13 +2,13 @@ import { Link } from 'react-router-dom'
 
 function Header() {
   return (
-    <header className="border-b border-border bg-surface">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
-        <Link to="/" className="font-display text-lg font-bold text-ink">
+    <header className="bg-black">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-5">
+        <Link to="/" className="label-tracked text-sm text-white">
           The Author&apos;s Table
         </Link>
         <nav>
-          <Link to="/" className="font-body text-sm text-ink-muted hover:text-ink">
+          <Link to="/" className="label-tracked text-xs text-white/80 hover:text-white">
             Gallery
           </Link>
         </nav>

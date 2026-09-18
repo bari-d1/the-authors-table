@@ -23,11 +23,13 @@ const SCRIM_PADDING_X = 56
 const SCRIM_PADDING_Y = 56
 const SCRIM_RADIUS = 32
 
-function getToken(name, fallback) {
-  if (typeof window === 'undefined') return fallback
-  const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
-  return value || fallback
-}
+// Deliberately hardcoded, not read from the site's CSS custom properties:
+// the quote card has its own background templates and color scheme,
+// independent of whatever the surrounding site theme is doing. Reading live
+// tokens here would mean a site-wide restyle silently changes the
+// downloadable image too, which isn't part of that theme.
+const CANVAS_FALLBACK_FILL = '#f6f2e9'
+const CANVAS_TEXT_COLOR = '#fdfbf6'
 
 function wrapText(ctx, text, maxWidth) {
   const words = text.split(/\s+/).filter(Boolean)
@@ -160,7 +162,7 @@ function QuoteCardCanvas({ quote, backgroundUrl, attribution, bookTitle, bookId,
 
       // Paper-colored fallback fill first, so a missing/failed background
       // image never leaves a blank or transparent card.
-      ctx.fillStyle = getToken('--color-paper', '#f6f2e9')
+      ctx.fillStyle = CANVAS_FALLBACK_FILL
       ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
 
       if (backgroundUrl) {
@@ -223,7 +225,7 @@ function QuoteCardCanvas({ quote, backgroundUrl, attribution, bookTitle, bookId,
       ctx.textBaseline = 'alphabetic'
 
       ctx.font = `700 ${fontSize}px "Space Grotesk", sans-serif`
-      ctx.fillStyle = getToken('--color-surface', '#fdfbf6')
+      ctx.fillStyle = CANVAS_TEXT_COLOR
       let cursorY = textTop + fontSize * 0.9
       for (const line of lines) {
         ctx.fillText(line, CANVAS_WIDTH / 2, cursorY)
@@ -329,7 +331,7 @@ function QuoteCardCanvas({ quote, backgroundUrl, attribution, bookTitle, bookId,
         ref={canvasRef}
         width={CANVAS_WIDTH}
         height={CANVAS_HEIGHT}
-        className="mx-auto w-full max-w-xs rounded-2xl border border-border shadow-md"
+        className="mx-auto w-full max-w-xs rounded-sharp border border-border shadow-md"
       />
       <div className="mt-4 flex justify-center gap-3">
         <PillButton
@@ -352,7 +354,7 @@ function QuoteCardCanvas({ quote, backgroundUrl, attribution, bookTitle, bookId,
         )}
       </div>
       {shareError && (
-        <p className="mt-2 text-center font-body text-sm text-tag-plum">{shareError}</p>
+        <p className="mt-2 text-center font-body text-sm text-error">{shareError}</p>
       )}
     </div>
   )

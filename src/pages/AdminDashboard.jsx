@@ -16,19 +16,19 @@ function AdminDashboardContent() {
   return (
     <div className="mx-auto max-w-4xl px-6 py-16">
       <div className="mb-8 flex items-center justify-between gap-4">
-        <h1 className="font-display text-3xl font-bold text-ink">Admin dashboard</h1>
+        <h1 className="font-heading text-3xl font-bold text-ink">Admin dashboard</h1>
         <PillButton type="button" variant="secondary" onClick={handleLogOut}>
           Log out
         </PillButton>
       </div>
 
       <section className="mb-10">
-        <h2 className="mb-4 font-display text-xl font-bold text-ink">Metrics</h2>
+        <h2 className="mb-4 font-heading text-xl font-bold text-ink">Metrics</h2>
         <MetricsPanel />
       </section>
 
       <section>
-        <h2 className="mb-4 font-display text-xl font-bold text-ink">Moderation</h2>
+        <h2 className="mb-4 font-heading text-xl font-bold text-ink">Moderation</h2>
         <ModerationPanel />
       </section>
     </div>

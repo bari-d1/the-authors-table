@@ -19,10 +19,10 @@ function QuoteFreeTextInput({ value, onChange }) {
         maxLength={MAX_QUOTE_LENGTH}
         rows={3}
         placeholder="Or type or paste a line to share…"
-        className="w-full rounded-lg border border-border bg-paper p-3 font-body text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-1 focus:ring-gold"
+        className="w-full rounded-lg border border-border bg-white p-3 font-body text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-1 focus:ring-black"
       />
       <div
-        className={`mt-1 text-right font-body text-xs ${counterIsWarning ? 'text-tag-plum' : 'text-ink-muted'}`}
+        className={`mt-1 text-right font-body text-xs ${counterIsWarning ? 'text-error' : 'text-ink-muted'}`}
       >
         {value.length} / {MAX_QUOTE_LENGTH}
       </div>

@@ -140,7 +140,7 @@ function CommentList({ bookId, onSubmitReply }) {
 
   if (error) {
     return (
-      <p className="rounded-2xl border border-border bg-surface px-6 py-8 text-center font-body text-ink">
+      <p className="rounded-sharp border border-border bg-white px-6 py-8 text-center font-body text-ink">
         Something went wrong loading comments: {error}
       </p>
     )
@@ -154,7 +154,7 @@ function CommentList({ bookId, onSubmitReply }) {
 
   if (tree.length === 0) {
     return (
-      <p className="rounded-2xl border border-border bg-surface px-6 py-8 text-center font-body text-ink-muted">
+      <p className="rounded-sharp border border-border bg-white px-6 py-8 text-center font-body text-ink-muted">
         No comments yet. Be the first to join the discussion.
       </p>
     )
@@ -224,7 +224,7 @@ function CommentList({ bookId, onSubmitReply }) {
       </div>
 
       {visibleTree.length === 0 ? (
-        <p className="rounded-2xl border border-border bg-surface px-6 py-8 text-center font-body text-ink-muted">
+        <p className="rounded-sharp border border-border bg-white px-6 py-8 text-center font-body text-ink-muted">
           {filtersActive ? 'No comments match these filters.' : 'No comments yet. Be the first to join the discussion.'}
         </p>
       ) : (

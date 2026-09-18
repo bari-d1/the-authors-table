@@ -2,17 +2,17 @@ import { useAdminMetrics } from '../hooks/useAdminMetrics'
 
 function StatCard({ label, value }) {
   return (
-    <div className="rounded-2xl border border-border bg-surface p-5">
+    <div className="rounded-sharp border border-border bg-white p-5">
       <p className="font-body text-sm text-ink-muted">{label}</p>
-      <p className="mt-1 font-display text-3xl font-bold text-ink">{value}</p>
+      <p className="mt-1 font-heading text-3xl font-bold text-ink">{value}</p>
     </div>
   )
 }
 
 function BreakdownTable({ title, rows, valueKey }) {
   return (
-    <div className="rounded-2xl border border-border bg-surface p-5">
-      <h3 className="mb-3 font-display text-base font-bold text-ink">{title}</h3>
+    <div className="rounded-sharp border border-border bg-white p-5">
+      <h3 className="mb-3 font-heading text-base font-bold text-ink">{title}</h3>
       {rows.length === 0 ? (
         <p className="font-body text-sm text-ink-muted">No books yet.</p>
       ) : (
@@ -36,7 +36,7 @@ function MetricsPanel() {
 
   if (error) {
     return (
-      <p className="rounded-2xl border border-border bg-surface px-6 py-8 text-center font-body text-ink">
+      <p className="rounded-sharp border border-border bg-white px-6 py-8 text-center font-body text-ink">
         Couldn't load metrics: {error}
       </p>
     )
@@ -44,7 +44,7 @@ function MetricsPanel() {
 
   if (metrics === null) {
     return (
-      <p className="rounded-2xl border border-border bg-surface px-6 py-8 text-center font-body text-ink-muted">
+      <p className="rounded-sharp border border-border bg-white px-6 py-8 text-center font-body text-ink-muted">
         Loading metrics…
       </p>
     )

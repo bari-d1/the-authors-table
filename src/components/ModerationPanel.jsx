@@ -23,7 +23,7 @@ function ModerationPanel() {
 
   if (error) {
     return (
-      <p className="rounded-2xl border border-border bg-surface px-6 py-8 text-center font-body text-ink">
+      <p className="rounded-sharp border border-border bg-white px-6 py-8 text-center font-body text-ink">
         Couldn't load comments: {error}
       </p>
     )
@@ -31,7 +31,7 @@ function ModerationPanel() {
 
   if (comments === null) {
     return (
-      <p className="rounded-2xl border border-border bg-surface px-6 py-8 text-center font-body text-ink-muted">
+      <p className="rounded-sharp border border-border bg-white px-6 py-8 text-center font-body text-ink-muted">
         Loading comments…
       </p>
     )
@@ -42,7 +42,7 @@ function ModerationPanel() {
   return (
     <div>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h3 className="font-display text-base font-bold text-ink">Recent comments</h3>
+        <h3 className="font-heading text-base font-bold text-ink">Recent comments</h3>
         <PillButton
           type="button"
           variant={questionOnly ? 'primary' : 'secondary'}
@@ -52,10 +52,10 @@ function ModerationPanel() {
         </PillButton>
       </div>
 
-      {toggleError && <p className="mb-3 font-body text-sm text-tag-plum">{toggleError}</p>}
+      {toggleError && <p className="mb-3 font-body text-sm text-error">{toggleError}</p>}
 
       {visibleComments.length === 0 ? (
-        <p className="rounded-2xl border border-border bg-surface px-6 py-8 text-center font-body text-ink-muted">
+        <p className="rounded-sharp border border-border bg-white px-6 py-8 text-center font-body text-ink-muted">
           {questionOnly ? 'No comments flagged as questions.' : 'No comments yet.'}
         </p>
       ) : (
@@ -63,8 +63,8 @@ function ModerationPanel() {
           {visibleComments.map((comment) => (
             <li
               key={comment.id}
-              className={`rounded-lg border p-3 ${
-                comment.question ? 'border-gold bg-gold/5' : 'border-border bg-surface'
+              className={`border p-3 ${
+                comment.question ? 'border-teal bg-white' : 'border-border bg-white'
               }`}
             >
               <div className="flex items-start justify-between gap-3">
@@ -75,11 +75,7 @@ function ModerationPanel() {
                     <span>{comment.commenter_name}</span>
                     <span>·</span>
                     <span>{formatRelativeTime(comment.created_at)}</span>
-                    {comment.question && (
-                      <span className="rounded-pill bg-gold px-2 py-0.5 text-[10px] font-medium text-ink">
-                        Question for PJK
-                      </span>
-                    )}
+                    {comment.question && <span className="label-tracked text-teal">· Question for PJK</span>}
                   </p>
                   <p className="mt-1 font-body text-sm text-ink">
                     {comment.hidden ? (

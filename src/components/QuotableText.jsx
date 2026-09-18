@@ -83,7 +83,7 @@ function QuotableText({ children, onShareQuote }) {
           onMouseDown={(event) => event.preventDefault()}
           onClick={handleShare}
           style={{ top: popover.top, left: popover.left }}
-          className="fixed z-50 -translate-x-1/2 whitespace-nowrap rounded-pill bg-ink px-5 py-3 font-body text-sm font-medium text-paper shadow-lg"
+          className="label-tracked fixed z-50 -translate-x-1/2 whitespace-nowrap rounded-sharp bg-black px-5 py-3 text-xs text-white"
         >
           Share this quote
         </button>
