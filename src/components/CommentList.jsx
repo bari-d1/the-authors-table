@@ -4,21 +4,51 @@ import { supabase } from '../lib/supabaseClient'
 import CommentItem from './CommentItem'
 import PillButton from './PillButton'
 
+const DEFAULT_FILTERS = { question: false, chapterId: 'all' }
+
 function CommentList({ bookId, onSubmitReply }) {
   const [comments, setComments] = useState(null)
   const [error, setError] = useState(null)
   const [openReplyId, setOpenReplyId] = useState(null)
-  const [filter, setFilter] = useState('all')
+  const [chapters, setChapters] = useState([])
+  // chapterId: 'all' (no chapter filter), null (General / book-level
+  // comments), or a real chapter id. Kept as one object, not two separate
+  // toggles, so the question and chapter filters combine rather than
+  // fighting each other.
+  const [filters, setFilters] = useState(DEFAULT_FILTERS)
 
   function handleToggleReply(commentId) {
     setOpenReplyId((current) => (current === commentId ? null : commentId))
   }
 
   // Explicit reset (rather than relying on the parent page's loading-state
-  // branching to remount this component) so the filter never carries over
-  // from one book's thread to another's.
+  // branching to remount this component) so filters never carry over from
+  // one book's thread to another's.
   useEffect(() => {
-    setFilter('all')
+    setFilters(DEFAULT_FILTERS)
+  }, [bookId])
+
+  // Populates the chapter filter's options. Independent of the comments
+  // fetch/subscription above; chapters don't need realtime.
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadChapters() {
+      const { data } = await supabase
+        .from('chapters')
+        .select('id, number, title')
+        .eq('book_id', bookId)
+        .order('number')
+
+      if (cancelled) return
+      setChapters(data ?? [])
+    }
+
+    loadChapters()
+
+    return () => {
+      cancelled = true
+    }
   }, [bookId])
 
   useEffect(() => {
@@ -130,33 +160,72 @@ function CommentList({ bookId, onSubmitReply }) {
     )
   }
 
-  // Only the top-level flag decides inclusion; a qualifying question's full
-  // reply chain (including replies that aren't themselves questions) comes
-  // along with it since children are already nested inside each root node.
-  const visibleTree = filter === 'questions' ? tree.filter((comment) => comment.question) : tree
+  // Only each root's own flags decide inclusion; a qualifying comment's full
+  // reply chain (even replies that don't themselves match) comes along with
+  // it since children are already nested inside each root node.
+  function chapterMatches(comment) {
+    if (filters.chapterId === 'all') return true
+    if (filters.chapterId === null) return comment.chapter_id === null
+    return comment.chapter_id === filters.chapterId
+  }
+
+  const visibleTree = tree.filter((comment) => {
+    if (filters.question && !comment.question) return false
+    if (!chapterMatches(comment)) return false
+    return true
+  })
+
+  const filtersActive = filters.question || filters.chapterId !== 'all'
 
   return (
     <div>
-      <div className="mb-4 flex gap-2">
+      <div className="mb-3 flex flex-wrap gap-2">
         <PillButton
           type="button"
-          variant={filter === 'all' ? 'primary' : 'secondary'}
-          onClick={() => setFilter('all')}
+          variant={!filters.question ? 'primary' : 'secondary'}
+          onClick={() => setFilters((prev) => ({ ...prev, question: false }))}
         >
           All comments
         </PillButton>
         <PillButton
           type="button"
-          variant={filter === 'questions' ? 'primary' : 'secondary'}
-          onClick={() => setFilter('questions')}
+          variant={filters.question ? 'primary' : 'secondary'}
+          onClick={() => setFilters((prev) => ({ ...prev, question: true }))}
         >
           Questions for the author
         </PillButton>
       </div>
 
+      <div className="mb-4 flex flex-wrap gap-2">
+        <PillButton
+          type="button"
+          variant={filters.chapterId === 'all' ? 'primary' : 'secondary'}
+          onClick={() => setFilters((prev) => ({ ...prev, chapterId: 'all' }))}
+        >
+          All chapters
+        </PillButton>
+        <PillButton
+          type="button"
+          variant={filters.chapterId === null ? 'primary' : 'secondary'}
+          onClick={() => setFilters((prev) => ({ ...prev, chapterId: null }))}
+        >
+          General
+        </PillButton>
+        {chapters.map((chapter) => (
+          <PillButton
+            key={chapter.id}
+            type="button"
+            variant={filters.chapterId === chapter.id ? 'primary' : 'secondary'}
+            onClick={() => setFilters((prev) => ({ ...prev, chapterId: chapter.id }))}
+          >
+            {chapter.number}. {chapter.title}
+          </PillButton>
+        ))}
+      </div>
+
       {visibleTree.length === 0 ? (
         <p className="rounded-2xl border border-border bg-surface px-6 py-8 text-center font-body text-ink-muted">
-          No questions for the author yet.
+          {filtersActive ? 'No comments match these filters.' : 'No comments yet. Be the first to join the discussion.'}
         </p>
       ) : (
         <ul>
