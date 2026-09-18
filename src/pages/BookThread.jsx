@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import CommentComposer from '../components/CommentComposer'
 import CommentList from '../components/CommentList'
 import Layout from '../components/Layout'
 import PillButton from '../components/PillButton'
@@ -51,6 +52,25 @@ function BookThread() {
       cancelled = true
     }
   }, [bookId])
+
+  async function handleCommentSubmit({ content, commenterName, question, readerEmail, parentId }) {
+    const { error: insertError } = await supabase.from('comments').insert({
+      book_id: book.id,
+      chapter_id: null,
+      parent_id: parentId,
+      commenter_name: commenterName,
+      content,
+      question,
+      reader_email: readerEmail,
+    })
+
+    if (insertError) {
+      throw new Error(insertError.message)
+    }
+
+    // The new comment isn't added to local state here on purpose; a
+    // realtime subscription (separate work) is what will surface it.
+  }
 
   if (loading) {
     return (
@@ -124,9 +144,12 @@ function BookThread() {
           </section>
         )}
 
-        {/* Discussion. The composer that posts new comments is separate, later work. */}
+        {/* Discussion */}
         <section className="mt-10">
           <h2 className="mb-4 font-display text-xl font-bold text-ink">Discussion</h2>
+          <div className="mb-6">
+            <CommentComposer parentId={null} onSubmit={handleCommentSubmit} />
+          </div>
           <CommentList bookId={book.id} />
         </section>
       </div>
