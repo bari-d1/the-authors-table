@@ -1,8 +1,18 @@
+import FormControl from '@mui/material/FormControl'
+import MenuItem from '@mui/material/MenuItem'
+import Select from '@mui/material/Select'
 import { useEffect, useState } from 'react'
 import { buildCommentTree } from '../lib/commentTree'
 import { supabase } from '../lib/supabaseClient'
 import CommentItem from './CommentItem'
 import PillButton from './PillButton'
+
+// Select values have to be primitives MUI can compare by identity, but
+// filters.chapterId also needs to carry a real `null` (General / book-level
+// comments) - these two sentinels bridge between that and the select's
+// string-only value space.
+const ALL_CHAPTERS_VALUE = 'all'
+const GENERAL_VALUE = 'general'
 
 const DEFAULT_FILTERS = { question: false, chapterId: 'all' }
 
@@ -196,31 +206,33 @@ function CommentList({ bookId, onSubmitReply }) {
         </PillButton>
       </div>
 
-      <div className="mb-4 flex flex-wrap gap-2">
-        <PillButton
-          type="button"
-          variant={filters.chapterId === 'all' ? 'primary' : 'secondary'}
-          onClick={() => setFilters((prev) => ({ ...prev, chapterId: 'all' }))}
-        >
-          All chapters
-        </PillButton>
-        <PillButton
-          type="button"
-          variant={filters.chapterId === null ? 'primary' : 'secondary'}
-          onClick={() => setFilters((prev) => ({ ...prev, chapterId: null }))}
-        >
-          General
-        </PillButton>
-        {chapters.map((chapter) => (
-          <PillButton
-            key={chapter.id}
-            type="button"
-            variant={filters.chapterId === chapter.id ? 'primary' : 'secondary'}
-            onClick={() => setFilters((prev) => ({ ...prev, chapterId: chapter.id }))}
+      <div className="mb-4">
+        <FormControl size="small" sx={{ minWidth: 220 }}>
+          <Select
+            value={
+              filters.chapterId === 'all'
+                ? ALL_CHAPTERS_VALUE
+                : filters.chapterId === null
+                  ? GENERAL_VALUE
+                  : filters.chapterId
+            }
+            onChange={(event) => {
+              const raw = event.target.value
+              const chapterId =
+                raw === ALL_CHAPTERS_VALUE ? 'all' : raw === GENERAL_VALUE ? null : raw
+              setFilters((prev) => ({ ...prev, chapterId }))
+            }}
+            sx={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: 'var(--color-ink)' }}
           >
-            {chapter.number}. {chapter.title}
-          </PillButton>
-        ))}
+            <MenuItem value={ALL_CHAPTERS_VALUE}>All chapters</MenuItem>
+            <MenuItem value={GENERAL_VALUE}>General</MenuItem>
+            {chapters.map((chapter) => (
+              <MenuItem key={chapter.id} value={chapter.id} sx={{ whiteSpace: 'normal' }}>
+                {chapter.number}. {chapter.title}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
       </div>
 
       {visibleTree.length === 0 ? (
