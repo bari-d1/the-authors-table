@@ -112,6 +112,20 @@ Both are marked `public = true`, so objects are readable at their public URL (`/
 - Through the Supabase dashboard (Storage → bucket → Upload), or
 - Via a service-role connection (e.g. a one-off script or the PDF import pipeline), never from frontend code.
 
+## Admin auth
+
+The admin dashboard (`/admin`) is gated behind Supabase Auth (email/password), enabled by default on this project - nothing extra to turn on.
+
+**This is one shared account, not a per-person account.** Both PJK and Dayo log in with the same email/password; there's no sign-up flow in the app (the login form only calls `signInWithPassword`), and no per-admin permissions or audit trail beyond what Supabase's own Auth logs capture. If that stops being enough (e.g. more than two people need access, or per-person action history matters), that's a real follow-up, not something worth building for launch weekend.
+
+The account itself is created directly via the Supabase Auth Admin API (service-role key, from a one-off script - never the public anon key, never from frontend code), pre-confirmed so no email confirmation step is needed before the first login. It is **not** created through the public site.
+
+**Resetting the password** uses Supabase's standard flow, either:
+- From the Supabase dashboard: Authentication → Users → find the account → "Send password recovery" (or reset it directly), or
+- Programmatically: `supabase.auth.resetPasswordForEmail(email)` from the client, which emails a reset link.
+
+Either way, this depends on the project's email sending actually working (Supabase's built-in email sending has a low default rate limit - see `auth.email.max_frequency` - fine for a single shared account, but worth knowing about if resets seem to silently not arrive).
+
 ## Metrics
 
 The admin dashboard shows live counts, computed as grouped queries against `comments` and `quote_cards` on every page load. There is deliberately no separate metrics/counters table, since at this scale a stored counter is more likely to drift out of sync than to save anything meaningful in query time.
