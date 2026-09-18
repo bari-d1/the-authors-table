@@ -4,6 +4,9 @@ import ChapterReader from '../components/ChapterReader'
 import ChapterSearchBox from '../components/ChapterSearchBox'
 import ChapterSelector from '../components/ChapterSelector'
 import Layout from '../components/Layout'
+import QuotableText from '../components/QuotableText'
+import QuoteFreeTextInput from '../components/QuoteFreeTextInput'
+import { capQuote } from '../lib/capQuote'
 import { useBooks } from '../hooks/useBooks'
 import { useChapterContent } from '../hooks/useChapterContent'
 import { useChapters } from '../hooks/useChapters'
@@ -15,6 +18,10 @@ function ChapterSearch() {
   const [selectedBookId, setSelectedBookId] = useState(null)
   const [selectedChapterId, setSelectedChapterId] = useState(null)
   const [highlightedParagraphIndex, setHighlightedParagraphIndex] = useState(null)
+  // The quote-share flow's shared state: wherever the quote-card generator
+  // (upcoming work) ends up reading its quote from, it's this.
+  const [selectedQuote, setSelectedQuote] = useState('')
+  const [quoteNotice, setQuoteNotice] = useState(null)
   const fadeTimerRef = useRef(null)
   const { books } = useBooks()
   const { chapters } = useChapters(selectedBookId)
@@ -65,6 +72,25 @@ function ChapterSearch() {
     }, HIGHLIGHT_DURATION_MS)
   }, [])
 
+  // A browser text selection isn't bound by a textarea's maxLength, so this
+  // is where the cap actually gets enforced for that path.
+  function handleShareQuote(rawText) {
+    const result = capQuote(rawText)
+    setSelectedQuote(result.text)
+    setQuoteNotice(
+      result.wasTrimmed
+        ? `Trimmed to ${result.text.length} characters (your selection was ${result.originalLength}).`
+        : null,
+    )
+  }
+
+  function handleFreeTypeChange(value) {
+    setSelectedQuote(value)
+    // A manual edit supersedes whatever the last selection's trim notice
+    // said; the textarea's own maxLength already keeps this path in bounds.
+    setQuoteNotice(null)
+  }
+
   return (
     <Layout>
       <div className="mx-auto max-w-2xl px-6 py-16">
@@ -103,12 +129,23 @@ function ChapterSearch() {
           />
         </div>
 
-        <div className="mt-10">
-          <ChapterReader
-            chapterContent={chapterContent}
-            highlightedIndex={highlightedParagraphIndex}
-            onScrolledIntoView={handleScrolledIntoView}
-          />
+        <div className="mt-10 rounded-2xl border border-border bg-surface p-5">
+          <h2 className="mb-1 font-display text-lg font-bold text-ink">Share a quote</h2>
+          <p className="mb-3 font-body text-sm text-ink-muted">
+            Select a line in the chapter below, or type one here.
+          </p>
+          <QuoteFreeTextInput value={selectedQuote} onChange={handleFreeTypeChange} />
+          {quoteNotice && <p className="mt-2 font-body text-sm text-tag-plum">{quoteNotice}</p>}
+        </div>
+
+        <div className="mt-6">
+          <QuotableText onShareQuote={handleShareQuote}>
+            <ChapterReader
+              chapterContent={chapterContent}
+              highlightedIndex={highlightedParagraphIndex}
+              onScrolledIntoView={handleScrolledIntoView}
+            />
+          </QuotableText>
         </div>
       </div>
     </Layout>
