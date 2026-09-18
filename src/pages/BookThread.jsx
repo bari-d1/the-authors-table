@@ -4,15 +4,19 @@ import CommentComposer from '../components/CommentComposer'
 import CommentList from '../components/CommentList'
 import Layout from '../components/Layout'
 import PillButton from '../components/PillButton'
+import { useAuthor } from '../hooks/useAuthor'
 import { supabase } from '../lib/supabaseClient'
 
 function BookThread() {
   const { bookId } = useParams()
   const [book, setBook] = useState(null)
-  const [author, setAuthor] = useState(null)
   const [notFound, setNotFound] = useState(false)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(true)
+  // The full bio only lives on the gallery page now; this page just needs
+  // the author's name for the byline, so a failure here shouldn't block
+  // the book/discussion from rendering.
+  const { author } = useAuthor()
 
   useEffect(() => {
     let cancelled = false
@@ -22,27 +26,27 @@ function BookThread() {
       setError(null)
       setNotFound(false)
 
-      const [bookResult, authorResult] = await Promise.all([
-        supabase.from('books').select('*').eq('id', bookId).maybeSingle(),
-        supabase.from('author').select('*').maybeSingle(),
-      ])
+      const { data, error: fetchError } = await supabase
+        .from('books')
+        .select('*')
+        .eq('id', bookId)
+        .maybeSingle()
 
       if (cancelled) return
 
-      if (bookResult.error || authorResult.error) {
-        setError((bookResult.error || authorResult.error).message)
+      if (fetchError) {
+        setError(fetchError.message)
         setLoading(false)
         return
       }
 
-      if (!bookResult.data) {
+      if (!data) {
         setNotFound(true)
         setLoading(false)
         return
       }
 
-      setBook(bookResult.data)
-      setAuthor(authorResult.data)
+      setBook(data)
       setLoading(false)
     }
 
@@ -129,23 +133,6 @@ function BookThread() {
             )}
           </div>
         </section>
-
-        {/* Author section, visually distinct from the banner above */}
-        {author && (
-          <section className="mt-10 flex flex-col items-center gap-4 rounded-sharp border border-border bg-white p-6 text-center sm:flex-row sm:items-center sm:gap-6 sm:text-left">
-            {author.photo_url && (
-              <img
-                src={author.photo_url}
-                alt={author.name}
-                className="h-20 w-20 shrink-0 rounded-full border border-border object-cover"
-              />
-            )}
-            <div className="flex flex-col gap-1">
-              <p className="font-heading text-base font-bold text-ink">{author.name}</p>
-              {author.bio && <p className="font-body text-sm text-ink-muted">{author.bio}</p>}
-            </div>
-          </section>
-        )}
 
         {/* Discussion */}
         <section className="mt-10">
