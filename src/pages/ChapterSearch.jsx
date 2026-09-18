@@ -110,7 +110,7 @@ function ChapterSearch() {
   return (
     <Layout>
       <div className="mx-auto max-w-2xl px-6 py-16">
-        <h1 className="mb-6 font-heading text-3xl font-bold text-ink">Search chapters</h1>
+        <h1 className="mb-6 font-heading text-3xl font-bold text-ink">Share a Quote</h1>
         <div className="flex flex-col gap-3">
           <BookSelector value={selectedBookId} onChange={handleBookChange} />
           <ChapterSelector
@@ -130,7 +130,7 @@ function ChapterSearch() {
         </div>
 
         <div className="mt-10 rounded-sharp border border-border bg-white p-5">
-          <h2 className="mb-1 font-heading text-lg font-bold text-ink">Share a quote</h2>
+          <h2 className="mb-1 font-heading text-lg font-bold text-ink">Compose your quote</h2>
           <p className="mb-3 font-body text-sm text-ink-muted">
             Select a line in the chapter below, or type one here.
           </p>

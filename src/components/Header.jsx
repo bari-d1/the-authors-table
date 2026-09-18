@@ -24,7 +24,7 @@ function Header() {
             Gallery
           </Link>
           <Link to="/search" className="label-tracked text-xs text-white/80 hover:text-white">
-            Search
+            Share a Quote
           </Link>
         </nav>
       </div>
