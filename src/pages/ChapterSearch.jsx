@@ -100,17 +100,20 @@ function ChapterSearch() {
           />
         </div>
 
-        <div className="mt-6">
+        {highlightedParagraphIndex !== null && (
+          <p className="label-tracked mt-8 text-xs text-ink-muted">
+            Highlight a line below, then tap "Share this quote"
+          </p>
+        )}
+
+        <div className="mt-3">
           <QuotableText onShareQuote={handleShareQuote}>
             <ChapterReader chapterContent={chapterContent} highlightedIndex={highlightedParagraphIndex} />
           </QuotableText>
         </div>
 
         <div className="mt-10 rounded-sharp border border-border bg-white p-5">
-          <h2 className="mb-1 font-heading text-lg font-bold text-ink">Your quote</h2>
-          <p className="mb-3 font-body text-sm text-ink-muted">
-            Highlight a line in the passage above and tap "Share this quote" to select it.
-          </p>
+          <h2 className="mb-3 font-heading text-lg font-bold text-ink">Your quote</h2>
           <div className="min-h-22 rounded-sharp border border-border bg-white p-3 font-body text-sm text-ink">
             {selectedQuote || <span className="text-ink-muted">Nothing selected yet.</span>}
           </div>

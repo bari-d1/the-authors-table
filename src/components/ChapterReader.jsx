@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react'
 import { buildExcerptWindow } from '../lib/buildExcerptWindow'
 import { splitIntoParagraphs } from '../lib/splitIntoParagraphs'
 
-// Shows a ~150-word excerpt around whichever search result the reader
+// Shows a ~50-word excerpt around whichever search result the reader
 // clicked, not the whole chapter - readers select a quote from within that
 // excerpt, which also keeps a shared quote honestly tied to a real passage
 // rather than an arbitrary stretch of the chapter. The highlighted
