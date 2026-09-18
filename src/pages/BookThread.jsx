@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import CommentList from '../components/CommentList'
 import Layout from '../components/Layout'
 import PillButton from '../components/PillButton'
 import { supabase } from '../lib/supabaseClient'
@@ -123,9 +124,10 @@ function BookThread() {
           </section>
         )}
 
-        {/* Placeholder for the comment thread, built in a later piece of work */}
-        <section className="mt-10 rounded-2xl border border-dashed border-border px-6 py-12 text-center">
-          <p className="font-body text-sm text-ink-muted">Discussion thread coming soon</p>
+        {/* Discussion. The composer that posts new comments is separate, later work. */}
+        <section className="mt-10">
+          <h2 className="mb-4 font-display text-xl font-bold text-ink">Discussion</h2>
+          <CommentList bookId={book.id} />
         </section>
       </div>
     </Layout>
