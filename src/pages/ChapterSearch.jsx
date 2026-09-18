@@ -5,6 +5,7 @@ import ChapterSearchBox from '../components/ChapterSearchBox'
 import ChapterSelector from '../components/ChapterSelector'
 import Layout from '../components/Layout'
 import QuotableText from '../components/QuotableText'
+import QuoteBackgroundPicker from '../components/QuoteBackgroundPicker'
 import QuoteFreeTextInput from '../components/QuoteFreeTextInput'
 import { capQuote } from '../lib/capQuote'
 import { useBooks } from '../hooks/useBooks'
@@ -22,6 +23,7 @@ function ChapterSearch() {
   // (upcoming work) ends up reading its quote from, it's this.
   const [selectedQuote, setSelectedQuote] = useState('')
   const [quoteNotice, setQuoteNotice] = useState(null)
+  const [selectedBackgroundUrl, setSelectedBackgroundUrl] = useState(null)
   const fadeTimerRef = useRef(null)
   const { books } = useBooks()
   const { chapters } = useChapters(selectedBookId)
@@ -91,6 +93,10 @@ function ChapterSearch() {
     setQuoteNotice(null)
   }
 
+  const handleBackgroundChange = useCallback((url) => {
+    setSelectedBackgroundUrl(url)
+  }, [])
+
   return (
     <Layout>
       <div className="mx-auto max-w-2xl px-6 py-16">
@@ -136,6 +142,12 @@ function ChapterSearch() {
           </p>
           <QuoteFreeTextInput value={selectedQuote} onChange={handleFreeTypeChange} />
           {quoteNotice && <p className="mt-2 font-body text-sm text-tag-plum">{quoteNotice}</p>}
+
+          <h3 className="mb-2 mt-5 font-body text-sm font-medium text-ink">Background</h3>
+          <QuoteBackgroundPicker value={selectedBackgroundUrl} onChange={handleBackgroundChange} />
+          <p className="mt-2 truncate font-body text-xs text-ink-muted">
+            Selected background: {selectedBackgroundUrl ?? 'none'}
+          </p>
         </div>
 
         <div className="mt-6">
