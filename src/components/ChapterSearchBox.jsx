@@ -7,19 +7,15 @@ const DEBOUNCE_MS = 250
 const PLACEHOLDER_CLASSES =
   'rounded-lg border border-border bg-white px-3 py-2 font-body text-sm text-ink-muted'
 
+// Plain text, no per-word emphasis - the results list is just there to let
+// a reader find and pick a passage, the actual "this is what you selected"
+// highlight belongs on the passage itself once they've clicked into it,
+// not scattered across every match in the list before they've chosen one.
 function Excerpt({ excerpt }) {
   return (
     <>
       {excerpt.leadingEllipsis && '… '}
-      {excerpt.segments.map((segment, i) =>
-        segment.highlight ? (
-          <mark key={i} className="bg-transparent font-semibold text-ink">
-            {segment.text}
-          </mark>
-        ) : (
-          <span key={i}>{segment.text}</span>
-        ),
-      )}
+      {excerpt.segments.map((segment) => segment.text).join('')}
       {excerpt.trailingEllipsis && ' …'}
     </>
   )
