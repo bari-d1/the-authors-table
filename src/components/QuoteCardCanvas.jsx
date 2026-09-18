@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { buildQuoteFilename } from '../lib/buildQuoteFilename'
+import { logQuoteCardDownload } from '../lib/logQuoteCardDownload'
 import PillButton from './PillButton'
 
 // Fixed output size for social sharing (4:5 portrait, an Instagram-friendly
@@ -107,7 +108,7 @@ function drawRoundedRect(ctx, x, y, width, height, radius) {
 // scrim sized to the text block + the quote (display font) + a smaller
 // attribution line (body font). Re-renders whenever quote, backgroundUrl,
 // or attribution change.
-function QuoteCardCanvas({ quote, backgroundUrl, attribution, bookTitle }) {
+function QuoteCardCanvas({ quote, backgroundUrl, attribution, bookTitle, bookId, chapterId }) {
   const canvasRef = useRef(null)
   const [isDownloading, setIsDownloading] = useState(false)
   // A ref, not just the state above: state updates are batched/async, so
@@ -246,6 +247,13 @@ function QuoteCardCanvas({ quote, backgroundUrl, attribution, bookTitle }) {
       // mobile browsers (iOS Safari in particular) handle the download
       // asynchronously, and revoking the URL too early can break it.
       setTimeout(() => URL.revokeObjectURL(url), 1000)
+
+      // The download has already succeeded at this point (the file is on
+      // its way to the reader regardless of what happens next). Logged for
+      // the metrics dashboard only - deliberately not awaited, so a slow or
+      // failing insert can't delay re-enabling the button, and nothing
+      // about its outcome is ever shown to the reader.
+      logQuoteCardDownload(bookId, chapterId)
     } catch (err) {
       console.error('QuoteCardCanvas: download failed', err)
     } finally {

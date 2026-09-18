@@ -24,6 +24,13 @@ function ChapterSearch() {
   // (upcoming work) ends up reading its quote from, it's this.
   const [selectedQuote, setSelectedQuote] = useState('')
   const [quoteNotice, setQuoteNotice] = useState(null)
+  // Provenance, captured at the moment the quote is captured (selection
+  // click or a free-type edit) rather than re-derived from whatever
+  // book/chapter happen to be selected later. The quote text is
+  // deliberately never cleared on a chapter switch, so by download time the
+  // selectors could point somewhere the quote didn't actually come from.
+  const [quoteSourceBookId, setQuoteSourceBookId] = useState(null)
+  const [quoteSourceChapterId, setQuoteSourceChapterId] = useState(null)
   const [selectedBackgroundUrl, setSelectedBackgroundUrl] = useState(null)
   const fadeTimerRef = useRef(null)
   const { books } = useBooks()
@@ -85,6 +92,9 @@ function ChapterSearch() {
         ? `Trimmed to ${result.text.length} characters (your selection was ${result.originalLength}).`
         : null,
     )
+    // This quote came from chapter text, so both are known.
+    setQuoteSourceBookId(selectedBookId)
+    setQuoteSourceChapterId(selectedChapterId)
   }
 
   function handleFreeTypeChange(value) {
@@ -92,6 +102,10 @@ function ChapterSearch() {
     // A manual edit supersedes whatever the last selection's trim notice
     // said; the textarea's own maxLength already keeps this path in bounds.
     setQuoteNotice(null)
+    // Free-type text has no chapter provenance even if one happens to be
+    // loaded; the book context (if any) still carries over.
+    setQuoteSourceBookId(selectedBookId)
+    setQuoteSourceChapterId(null)
   }
 
   const handleBackgroundChange = useCallback((url) => {
@@ -156,7 +170,12 @@ function ChapterSearch() {
             backgroundUrl={selectedBackgroundUrl}
             attribution={selectedBook ? `${selectedBook.title} · by PJK` : null}
             bookTitle={selectedBook?.title}
+            bookId={quoteSourceBookId}
+            chapterId={quoteSourceChapterId}
           />
+          <p className="mt-2 font-body text-xs text-ink-muted">
+            Will log: book_id={quoteSourceBookId ?? 'null'}, chapter_id={quoteSourceChapterId ?? 'null'}
+          </p>
         </div>
 
         <div className="mt-6">
