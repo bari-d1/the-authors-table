@@ -49,16 +49,26 @@ function YouTubeIcon() {
   )
 }
 
-// Real profile URLs for Instagram/LinkedIn/Facebook/YouTube aren't known
-// yet - not guessing them, so those four are icons only for now (no href)
-// until the real links are supplied. Email is the one destination this
-// site already has and knows is correct.
+// Real profile URLs, pulled directly from joshuakomolafe.com's own footer
+// markup rather than guessed.
 const SOCIAL_LINKS = [
-  { label: 'Instagram', href: null, Icon: InstagramIcon },
-  { label: 'LinkedIn', href: null, Icon: LinkedInIcon },
+  { label: 'Instagram', href: 'https://www.instagram.com/joshua_komolafe/', Icon: InstagramIcon },
+  {
+    label: 'LinkedIn',
+    href: 'https://www.linkedin.com/in/joshua-komolafe-a3700134',
+    Icon: LinkedInIcon,
+  },
   { label: 'Email', href: 'mailto:info@joshuakomolafe.com', Icon: MailIcon },
-  { label: 'Facebook', href: null, Icon: FacebookIcon },
-  { label: 'YouTube', href: null, Icon: YouTubeIcon },
+  {
+    label: 'Facebook',
+    href: 'https://www.facebook.com/JoshuaKomolafee/?ref=bookmarks',
+    Icon: FacebookIcon,
+  },
+  {
+    label: 'YouTube',
+    href: 'https://www.youtube.com/channel/UCdwtsKx4uaewb3DYgpKJTIA',
+    Icon: YouTubeIcon,
+  },
 ]
 
 function Footer() {
