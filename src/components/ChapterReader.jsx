@@ -1,74 +1,51 @@
 import { useEffect, useMemo } from 'react'
+import { buildExcerptWindow } from '../lib/buildExcerptWindow'
 import { splitIntoParagraphs } from '../lib/splitIntoParagraphs'
 
-// Renders a chapter's full text as readable prose, split into the same
-// units the search index uses (splitIntoParagraphs is a pure function of
+// Shows a ~150-word excerpt around whichever search result the reader
+// clicked, not the whole chapter - readers select a quote from within that
+// excerpt, which also keeps a shared quote honestly tied to a real passage
+// rather than an arbitrary stretch of the chapter. The highlighted
+// paragraph persists until a different result is clicked (or the chapter
+// changes), rather than fading - since it's what the whole excerpt is
+// built around, fading it out while the excerpt stayed put would just
+// look like the "why is this here" paragraph. Units are the same ones the
+// search index uses (splitIntoParagraphs is a pure function of
 // chapterContent, so the indices line up without sharing any instance).
-// Each unit gets a stable id so a search result can scroll straight to it.
-function ChapterReader({ chapterContent, highlightedIndex, onScrolledIntoView }) {
+function ChapterReader({ chapterContent, highlightedIndex }) {
   const paragraphs = useMemo(() => splitIntoParagraphs(chapterContent), [chapterContent])
+  const excerpt = useMemo(
+    () => (highlightedIndex === null ? [] : buildExcerptWindow(paragraphs, highlightedIndex)),
+    [paragraphs, highlightedIndex],
+  )
 
   useEffect(() => {
     if (highlightedIndex === null) return
 
     const el = document.getElementById(`chapter-paragraph-${highlightedIndex}`)
-    if (!el) return
-
-    // block: 'center' rather than the scrollIntoView default ('start') so a
-    // match near the bottom of the chapter doesn't just scroll to its own
-    // top edge and sit half off-screen.
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-
-    // A long chapter can take a couple of seconds to smooth-scroll across
-    // (measured ~3-4s for a 300+ paragraph chapter), so the "fade after a
-    // few seconds" clock (owned by the caller) starts once the scroll
-    // actually stops moving, not the moment it's kicked off - otherwise the
-    // highlight can fade before, or just as, the paragraph arrives on
-    // screen. Polling scrollY rather than the 'scrollend' event so this
-    // doesn't depend on how long a given scroll takes or on browser support.
-    let settled = false
-    let lastY = window.scrollY
-    let stableTicks = 0
-
-    const poll = setInterval(() => {
-      const currentY = window.scrollY
-      if (currentY === lastY) {
-        stableTicks += 1
-      } else {
-        stableTicks = 0
-        lastY = currentY
-      }
-
-      if (stableTicks >= 2) {
-        settled = true
-        clearInterval(poll)
-        onScrolledIntoView?.()
-      }
-    }, 150)
-
-    // Hard ceiling in case scrolling somehow never settles, so the
-    // highlight doesn't get stuck permanently.
-    const ceiling = setTimeout(() => {
-      if (settled) return
-      clearInterval(poll)
-      onScrolledIntoView?.()
-    }, 8000)
-
-    return () => {
-      clearInterval(poll)
-      clearTimeout(ceiling)
-    }
-  }, [highlightedIndex, onScrolledIntoView])
+    // A short excerpt rarely needs scrolling at all (it replaces its own
+    // spot in the page rather than living somewhere far away), but this is
+    // a cheap safety net for when the reader scrolled elsewhere first.
+    el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }, [highlightedIndex])
 
   if (!chapterContent) return null
 
+  if (highlightedIndex === null) {
+    return (
+      <p className="rounded-sharp border border-border bg-white px-6 py-8 text-center font-body text-sm text-ink-muted">
+        Search the chapter above, then click a result to read that passage here.
+      </p>
+    )
+  }
+
   return (
     <div className="rounded-sharp border border-border bg-white px-6 py-10 sm:px-12 sm:py-14">
-      {paragraphs.map((paragraph) => (
+      {excerpt.map((paragraph) => (
         <p
           key={paragraph.index}
           id={`chapter-paragraph-${paragraph.index}`}
-          className={`-mx-3 mb-5 scroll-mt-8 rounded-md px-3 py-1.5 font-body text-base leading-loose text-ink transition-colors duration-1000 last:mb-0 ${
+          className={`-mx-3 mb-5 scroll-mt-8 rounded-md px-3 py-1.5 font-body text-base leading-loose text-ink transition-colors duration-500 last:mb-0 ${
             highlightedIndex === paragraph.index ? 'bg-teal/20' : 'bg-transparent'
           }`}
         >

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import BookSelector from '../components/BookSelector'
 import ChapterReader from '../components/ChapterReader'
 import ChapterSearchBox from '../components/ChapterSearchBox'
@@ -7,31 +7,28 @@ import Layout from '../components/Layout'
 import QuotableText from '../components/QuotableText'
 import QuoteBackgroundPicker from '../components/QuoteBackgroundPicker'
 import QuoteCardCanvas from '../components/QuoteCardCanvas'
-import QuoteFreeTextInput from '../components/QuoteFreeTextInput'
 import { capQuote } from '../lib/capQuote'
 import { useBooks } from '../hooks/useBooks'
 import { useChapterContent } from '../hooks/useChapterContent'
-
-const HIGHLIGHT_DURATION_MS = 2500
 
 // Chapter search: pick a book, pick a chapter, search its text.
 function ChapterSearch() {
   const [selectedBookId, setSelectedBookId] = useState(null)
   const [selectedChapterId, setSelectedChapterId] = useState(null)
+  // Doubles as "which paragraph is the reading excerpt centered on" and
+  // "which paragraph is highlighted" - persists until a different result
+  // is clicked or the chapter changes, rather than fading, since the
+  // excerpt itself is built around it.
   const [highlightedParagraphIndex, setHighlightedParagraphIndex] = useState(null)
-  // The quote-share flow's shared state: wherever the quote-card generator
-  // (upcoming work) ends up reading its quote from, it's this.
+  // The quote-share flow's shared state. Only ever set from an actual
+  // chapter-text selection (via QuotableText) - readers can't type
+  // anything else in here, the shared quote has to be a real passage they
+  // selected, not arbitrary text.
   const [selectedQuote, setSelectedQuote] = useState('')
   const [quoteNotice, setQuoteNotice] = useState(null)
-  // Provenance, captured at the moment the quote is captured (selection
-  // click or a free-type edit) rather than re-derived from whatever
-  // book/chapter happen to be selected later. The quote text is
-  // deliberately never cleared on a chapter switch, so by download time the
-  // selectors could point somewhere the quote didn't actually come from.
   const [quoteSourceBookId, setQuoteSourceBookId] = useState(null)
   const [quoteSourceChapterId, setQuoteSourceChapterId] = useState(null)
   const [selectedBackgroundUrl, setSelectedBackgroundUrl] = useState(null)
-  const fadeTimerRef = useRef(null)
   const { books } = useBooks()
   const { content: chapterContent, error: contentError } = useChapterContent(selectedChapterId)
 
@@ -44,11 +41,10 @@ function ChapterSearch() {
     setSelectedChapterId(null)
   }, [selectedBookId])
 
-  // A highlighted paragraph index only means something for the chapter it
-  // was set against; a new chapter's paragraphs start over at index 0, so a
-  // leftover index could highlight the wrong passage.
+  // The excerpt/highlight only means something for the chapter it was set
+  // against; a new chapter's paragraphs start over at index 0, so a
+  // leftover index could highlight (and excerpt) the wrong passage.
   useEffect(() => {
-    clearTimeout(fadeTimerRef.current)
     setHighlightedParagraphIndex(null)
   }, [selectedChapterId])
 
@@ -61,24 +57,11 @@ function ChapterSearch() {
   }
 
   function handleResultClick(paragraphIndex) {
-    // A second click before the first highlight has finished fading should
-    // replace it outright, not leave an old fade timer racing the new one.
-    clearTimeout(fadeTimerRef.current)
     setHighlightedParagraphIndex(paragraphIndex)
   }
 
-  // ChapterReader calls this once the scroll it triggered has actually
-  // settled, not the instant it starts - a long chapter can take a couple
-  // of seconds to scroll across, and starting the fade clock on click would
-  // let the highlight disappear before, or just as, it comes into view.
-  const handleScrolledIntoView = useCallback(() => {
-    fadeTimerRef.current = setTimeout(() => {
-      setHighlightedParagraphIndex(null)
-    }, HIGHLIGHT_DURATION_MS)
-  }, [])
-
   // A browser text selection isn't bound by a textarea's maxLength, so this
-  // is where the cap actually gets enforced for that path.
+  // is where the cap actually gets enforced.
   function handleShareQuote(rawText) {
     const result = capQuote(rawText)
     setSelectedQuote(result.text)
@@ -87,25 +70,13 @@ function ChapterSearch() {
         ? `Trimmed to ${result.text.length} characters (your selection was ${result.originalLength}).`
         : null,
     )
-    // This quote came from chapter text, so both are known.
     setQuoteSourceBookId(selectedBookId)
     setQuoteSourceChapterId(selectedChapterId)
   }
 
-  function handleFreeTypeChange(value) {
-    setSelectedQuote(value)
-    // A manual edit supersedes whatever the last selection's trim notice
-    // said; the textarea's own maxLength already keeps this path in bounds.
-    setQuoteNotice(null)
-    // Free-type text has no chapter provenance even if one happens to be
-    // loaded; the book context (if any) still carries over.
-    setQuoteSourceBookId(selectedBookId)
-    setQuoteSourceChapterId(null)
-  }
-
-  const handleBackgroundChange = useCallback((url) => {
+  const handleBackgroundChange = (url) => {
     setSelectedBackgroundUrl(url)
-  }, [])
+  }
 
   return (
     <Layout>
@@ -129,12 +100,20 @@ function ChapterSearch() {
           />
         </div>
 
+        <div className="mt-6">
+          <QuotableText onShareQuote={handleShareQuote}>
+            <ChapterReader chapterContent={chapterContent} highlightedIndex={highlightedParagraphIndex} />
+          </QuotableText>
+        </div>
+
         <div className="mt-10 rounded-sharp border border-border bg-white p-5">
-          <h2 className="mb-1 font-heading text-lg font-bold text-ink">Compose your quote</h2>
+          <h2 className="mb-1 font-heading text-lg font-bold text-ink">Your quote</h2>
           <p className="mb-3 font-body text-sm text-ink-muted">
-            Select a line in the chapter below, or type one here.
+            Highlight a line in the passage above and tap "Share this quote" to select it.
           </p>
-          <QuoteFreeTextInput value={selectedQuote} onChange={handleFreeTypeChange} />
+          <div className="min-h-22 rounded-sharp border border-border bg-white p-3 font-body text-sm text-ink">
+            {selectedQuote || <span className="text-ink-muted">Nothing selected yet.</span>}
+          </div>
           {quoteNotice && <p className="mt-2 font-body text-sm text-error">{quoteNotice}</p>}
 
           <h3 className="mb-2 mt-5 font-body text-sm font-medium text-ink">Background</h3>
@@ -144,21 +123,10 @@ function ChapterSearch() {
           <QuoteCardCanvas
             quote={selectedQuote}
             backgroundUrl={selectedBackgroundUrl}
-            attribution={selectedBook ? `${selectedBook.title} · by Joshua Komolafe` : null}
             bookTitle={selectedBook?.title}
             bookId={quoteSourceBookId}
             chapterId={quoteSourceChapterId}
           />
-        </div>
-
-        <div className="mt-6">
-          <QuotableText onShareQuote={handleShareQuote}>
-            <ChapterReader
-              chapterContent={chapterContent}
-              highlightedIndex={highlightedParagraphIndex}
-              onScrolledIntoView={handleScrolledIntoView}
-            />
-          </QuotableText>
         </div>
       </div>
     </Layout>

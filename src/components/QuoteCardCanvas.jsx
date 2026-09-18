@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import logoUrl from '../assets/joshua-komolafe-logo.webp'
 import { buildQuoteFilename } from '../lib/buildQuoteFilename'
 import { logQuoteCardDownload } from '../lib/logQuoteCardDownload'
 import PillButton from './PillButton'
@@ -12,13 +13,19 @@ const CANVAS_WIDTH = 1080
 const CANVAS_HEIGHT = 1350
 
 const MARGIN_X = 100
-const QUOTE_MAX_FONT = 88
-const QUOTE_MIN_FONT = 34
+const QUOTE_MAX_FONT = 80
+const QUOTE_MIN_FONT = 32
 const QUOTE_FONT_STEP = 2
 const QUOTE_LINE_HEIGHT_RATIO = 1.25
-const QUOTE_MAX_HEIGHT_RATIO = 0.55 // keep the quote within a comfortable band of a 1350-tall canvas
-const ATTRIBUTION_FONT_SIZE = 32
-const ATTRIBUTION_GAP = 48
+
+const INTRO_FONT_SIZE = 36
+const INTRO_LINE_HEIGHT_RATIO = 1.4
+const INTRO_TOP_MARGIN = 110
+const INTRO_GAP_BELOW = 70
+
+const LOGO_WIDTH = 260
+const LOGO_BOTTOM_MARGIN = 90
+const LOGO_GAP_ABOVE = 70
 
 // Deliberately hardcoded, not read from the site's CSS custom properties:
 // the quote card has its own background templates and color scheme,
@@ -83,12 +90,12 @@ function drawCoverImage(ctx, img, canvasWidth, canvasHeight) {
 function loadImage(url) {
   return new Promise((resolve, reject) => {
     const img = new Image()
-    // The backgrounds bucket serves Access-Control-Allow-Origin: *, so this
-    // keeps the canvas untainted for a future export/download step instead
-    // of only working for the on-screen preview.
+    // The backgrounds bucket serves Access-Control-Allow-Origin: *, and the
+    // logo is a same-origin bundled asset - crossOrigin is harmless either
+    // way and keeps the canvas untainted for export/download.
     img.crossOrigin = 'anonymous'
     img.onload = () => resolve(img)
-    img.onerror = () => reject(new Error(`Failed to load background image: ${url}`))
+    img.onerror = () => reject(new Error(`Failed to load image: ${url}`))
     img.src = url
   })
 }
@@ -119,12 +126,13 @@ function canShareFiles() {
   }
 }
 
-// Renders the quote-share image: selected background (cover-fit) + the
-// quote (display font) + a smaller attribution line (body font), white
-// text directly on the photo with a soft drop shadow for legibility, no
-// background panel behind it. Re-renders whenever quote, backgroundUrl, or
-// attribution change.
-function QuoteCardCanvas({ quote, backgroundUrl, attribution, bookTitle, bookId, chapterId }) {
+// Renders the quote-share image: selected background (cover-fit), an intro
+// line at the top ("Hey, I am reading X and it says:"), the quote itself
+// centered in the middle, and the logo at the bottom in place of a text
+// attribution line - white text directly on the photo with a soft drop
+// shadow for legibility, no background panel behind it. Re-renders
+// whenever quote, backgroundUrl, or bookTitle change.
+function QuoteCardCanvas({ quote, backgroundUrl, bookTitle, bookId, chapterId }) {
   const canvasRef = useRef(null)
   const [isDownloading, setIsDownloading] = useState(false)
   const [isSharing, setIsSharing] = useState(false)
@@ -166,11 +174,25 @@ function QuoteCardCanvas({ quote, backgroundUrl, attribution, bookTitle, bookId,
 
       if (cancelled) return
 
+      // The logo is loaded alongside everything else, not drawn until its
+      // spot at the bottom is reached below. A failure here just means the
+      // card renders without it (logoImg stays null) rather than losing the
+      // whole preview - this is a bundled local asset, so failure should be
+      // rare, but the card shouldn't depend on it succeeding to still work.
+      let logoImg = null
+      try {
+        logoImg = await loadImage(logoUrl)
+      } catch (err) {
+        console.error('QuoteCardCanvas: logo failed to load', err)
+      }
+
+      if (cancelled) return
+
       // Canvas text rendering doesn't wait for web fonts on its own; without
       // this a first render can silently fall back to a default font.
       await Promise.all([
         document.fonts.load(`700 ${QUOTE_MAX_FONT}px "Space Grotesk"`),
-        document.fonts.load(`500 ${ATTRIBUTION_FONT_SIZE}px "Inter"`),
+        document.fonts.load(`500 ${INTRO_FONT_SIZE}px "Inter"`),
       ]).catch(() => {})
 
       if (cancelled) return
@@ -178,54 +200,70 @@ function QuoteCardCanvas({ quote, backgroundUrl, attribution, bookTitle, bookId,
       const trimmedQuote = (quote ?? '').trim()
       const hasQuote = trimmedQuote.length > 0
       const displayQuote = hasQuote ? `“${trimmedQuote}”` : 'Select a quote to preview it here.'
-
       const maxTextWidth = CANVAS_WIDTH - MARGIN_X * 2
-      const maxQuoteHeight = CANVAS_HEIGHT * QUOTE_MAX_HEIGHT_RATIO
-      const { fontSize, lines, lineHeight } = fitQuote(ctx, displayQuote, maxTextWidth, maxQuoteHeight)
-
-      const hasAttribution = hasQuote && Boolean(attribution)
-      ctx.font = `500 ${ATTRIBUTION_FONT_SIZE}px "Inter", sans-serif`
-      // A long book title needs the same width constraint as the quote -
-      // without wrapping it, a title longer than the card runs straight off
-      // both edges instead of staying inside the card.
-      const attributionLines = hasAttribution ? wrapText(ctx, attribution, maxTextWidth) : []
-      const attributionLineHeight = ATTRIBUTION_FONT_SIZE * 1.4
-      const attributionBlockHeight = attributionLines.length * attributionLineHeight
-      const quoteBlockHeight = lines.length * lineHeight
-      const totalTextHeight = quoteBlockHeight + (hasAttribution ? ATTRIBUTION_GAP + attributionBlockHeight : 0)
-      const textTop = (CANVAS_HEIGHT - totalTextHeight) / 2
 
       ctx.textAlign = 'center'
       ctx.textBaseline = 'alphabetic'
-
-      // No background panel behind the text anymore - just the white text
+      // No background panel behind any of the text - just white text
       // directly on the photo. A soft drop shadow (not a solid scrim) is
       // what keeps it legible against a light or busy patch of the image.
       ctx.shadowColor = 'rgba(0, 0, 0, 0.55)'
       ctx.shadowBlur = 14
       ctx.shadowOffsetY = 2
 
+      // Logo reserves space at the bottom regardless of whether there's a
+      // quote yet, so the card's proportions don't jump once one is picked.
+      const logoDrawHeight = logoImg ? LOGO_WIDTH * (logoImg.height / logoImg.width) : 0
+      const logoTop = logoImg ? CANVAS_HEIGHT - LOGO_BOTTOM_MARGIN - logoDrawHeight : CANVAS_HEIGHT
+      const bottomReserve = logoImg ? CANVAS_HEIGHT - logoTop + LOGO_GAP_ABOVE : MARGIN_X
+
+      // The intro line only makes sense once there's an actual quote (and
+      // therefore a book it came from); without one, the middle zone just
+      // starts near the top instead.
+      const introText = hasQuote ? `Hey, I am reading ${bookTitle ?? 'this book'} and it says:` : null
+      ctx.font = `500 ${INTRO_FONT_SIZE}px "Inter", sans-serif`
+      const introLines = introText ? wrapText(ctx, introText, maxTextWidth) : []
+      const introLineHeight = INTRO_FONT_SIZE * INTRO_LINE_HEIGHT_RATIO
+      const introBlockHeight = introLines.length * introLineHeight
+      const middleTop = introText ? INTRO_TOP_MARGIN + introBlockHeight + INTRO_GAP_BELOW : INTRO_TOP_MARGIN
+      const middleBottom = CANVAS_HEIGHT - bottomReserve
+      const middleHeight = Math.max(middleBottom - middleTop, QUOTE_MIN_FONT * QUOTE_LINE_HEIGHT_RATIO)
+
+      const { fontSize, lines, lineHeight } = fitQuote(ctx, displayQuote, maxTextWidth, middleHeight)
+      const quoteBlockHeight = lines.length * lineHeight
+      const quoteTop = middleTop + (middleHeight - quoteBlockHeight) / 2
+
+      if (introText) {
+        ctx.font = `500 ${INTRO_FONT_SIZE}px "Inter", sans-serif`
+        ctx.fillStyle = 'rgba(253, 251, 246, 0.85)'
+        let introCursorY = INTRO_TOP_MARGIN + INTRO_FONT_SIZE * 0.85
+        for (const line of introLines) {
+          ctx.fillText(line, CANVAS_WIDTH / 2, introCursorY)
+          introCursorY += introLineHeight
+        }
+      }
+
       ctx.font = `700 ${fontSize}px "Space Grotesk", sans-serif`
       ctx.fillStyle = CANVAS_TEXT_COLOR
-      let cursorY = textTop + fontSize * 0.9
+      let cursorY = quoteTop + fontSize * 0.9
       for (const line of lines) {
         ctx.fillText(line, CANVAS_WIDTH / 2, cursorY)
         cursorY += lineHeight
       }
 
-      if (hasAttribution) {
-        ctx.font = `500 ${ATTRIBUTION_FONT_SIZE}px "Inter", sans-serif`
-        ctx.fillStyle = 'rgba(253, 251, 246, 0.85)'
-        let attributionCursorY = textTop + quoteBlockHeight + ATTRIBUTION_GAP + ATTRIBUTION_FONT_SIZE * 0.8
-        for (const line of attributionLines) {
-          ctx.fillText(line, CANVAS_WIDTH / 2, attributionCursorY)
-          attributionCursorY += attributionLineHeight
-        }
-      }
-
       ctx.shadowColor = 'transparent'
       ctx.shadowBlur = 0
       ctx.shadowOffsetY = 0
+
+      if (logoImg) {
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.45)'
+        ctx.shadowBlur = 10
+        ctx.shadowOffsetY = 1
+        ctx.drawImage(logoImg, (CANVAS_WIDTH - LOGO_WIDTH) / 2, logoTop, LOGO_WIDTH, logoDrawHeight)
+        ctx.shadowColor = 'transparent'
+        ctx.shadowBlur = 0
+        ctx.shadowOffsetY = 0
+      }
     }
 
     render()
@@ -233,7 +271,7 @@ function QuoteCardCanvas({ quote, backgroundUrl, attribution, bookTitle, bookId,
     return () => {
       cancelled = true
     }
-  }, [quote, backgroundUrl, attribution])
+  }, [quote, backgroundUrl, bookTitle])
 
   const hasQuote = Boolean((quote ?? '').trim())
 
@@ -295,7 +333,7 @@ function QuoteCardCanvas({ quote, backgroundUrl, attribution, bookTitle, bookId,
 
       await navigator.share({
         files: [file],
-        title: attribution || "A quote from The Author's Table",
+        title: bookTitle ? `A quote from ${bookTitle}` : "A quote from The Author's Table",
       })
     } catch (err) {
       // The reader dismissing the native share sheet throws AbortError -
