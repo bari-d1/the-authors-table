@@ -1,7 +1,16 @@
 import { formatRelativeTime } from '../lib/formatRelativeTime'
+import CommentComposer from './CommentComposer'
+import PillButton from './PillButton'
 import TagBadge from './TagBadge'
 
-function CommentItem({ comment, depth = 0 }) {
+function CommentItem({ comment, depth = 0, openReplyId, onToggleReply, onSubmitReply }) {
+  const isReplyOpen = openReplyId === comment.id
+
+  async function handleReplySubmit(formData) {
+    await onSubmitReply(formData)
+    onToggleReply(comment.id)
+  }
+
   return (
     <li className={depth > 0 ? 'mt-4 border-l border-border pl-4' : 'mt-4'}>
       <div className="rounded-xl border border-border bg-surface p-4">
@@ -23,12 +32,41 @@ function CommentItem({ comment, depth = 0 }) {
         {!comment.hidden && (
           <p className="mt-2 font-body text-sm text-ink">{comment.content}</p>
         )}
+        {!comment.hidden && (
+          <div className="mt-3">
+            <PillButton
+              type="button"
+              variant="secondary"
+              className="px-3 py-1 text-xs"
+              onClick={() => onToggleReply(comment.id)}
+            >
+              {isReplyOpen ? 'Cancel' : 'Reply'}
+            </PillButton>
+          </div>
+        )}
       </div>
+
+      {isReplyOpen && (
+        <div className="mt-3">
+          <CommentComposer
+            parentId={comment.id}
+            submitLabel="Post reply"
+            onSubmit={handleReplySubmit}
+          />
+        </div>
+      )}
 
       {comment.children.length > 0 && (
         <ul>
           {comment.children.map((child) => (
-            <CommentItem key={child.id} comment={child} depth={depth + 1} />
+            <CommentItem
+              key={child.id}
+              comment={child}
+              depth={depth + 1}
+              openReplyId={openReplyId}
+              onToggleReply={onToggleReply}
+              onSubmitReply={onSubmitReply}
+            />
           ))}
         </ul>
       )}

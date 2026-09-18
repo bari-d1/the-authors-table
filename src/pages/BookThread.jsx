@@ -150,7 +150,7 @@ function BookThread() {
           <div className="mb-6">
             <CommentComposer parentId={null} onSubmit={handleCommentSubmit} />
           </div>
-          <CommentList bookId={book.id} />
+          <CommentList bookId={book.id} onSubmitReply={handleCommentSubmit} />
         </section>
       </div>
     </Layout>

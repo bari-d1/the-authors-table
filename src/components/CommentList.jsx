@@ -3,9 +3,14 @@ import { buildCommentTree } from '../lib/commentTree'
 import { supabase } from '../lib/supabaseClient'
 import CommentItem from './CommentItem'
 
-function CommentList({ bookId }) {
+function CommentList({ bookId, onSubmitReply }) {
   const [comments, setComments] = useState(null)
   const [error, setError] = useState(null)
+  const [openReplyId, setOpenReplyId] = useState(null)
+
+  function handleToggleReply(commentId) {
+    setOpenReplyId((current) => (current === commentId ? null : commentId))
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -57,7 +62,13 @@ function CommentList({ bookId }) {
   return (
     <ul>
       {tree.map((comment) => (
-        <CommentItem key={comment.id} comment={comment} />
+        <CommentItem
+          key={comment.id}
+          comment={comment}
+          openReplyId={openReplyId}
+          onToggleReply={handleToggleReply}
+          onSubmitReply={onSubmitReply}
+        />
       ))}
     </ul>
   )
