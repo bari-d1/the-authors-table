@@ -75,7 +75,9 @@ function ModerationPanel() {
                     <span>{comment.commenter_name}</span>
                     <span>·</span>
                     <span>{formatRelativeTime(comment.created_at)}</span>
-                    {comment.question && <span className="label-tracked text-teal">· Question for PJK</span>}
+                    {comment.question && (
+                      <span className="label-tracked text-teal">· Question for Joshua Komolafe</span>
+                    )}
                   </p>
                   <p className="mt-1 font-body text-sm text-ink">
                     {comment.hidden ? (

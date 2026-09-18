@@ -19,9 +19,6 @@ const QUOTE_LINE_HEIGHT_RATIO = 1.25
 const QUOTE_MAX_HEIGHT_RATIO = 0.55 // keep the quote within a comfortable band of a 1350-tall canvas
 const ATTRIBUTION_FONT_SIZE = 32
 const ATTRIBUTION_GAP = 48
-const SCRIM_PADDING_X = 56
-const SCRIM_PADDING_Y = 56
-const SCRIM_RADIUS = 32
 
 // Deliberately hardcoded, not read from the site's CSS custom properties:
 // the quote card has its own background templates and color scheme,
@@ -96,16 +93,6 @@ function loadImage(url) {
   })
 }
 
-function drawRoundedRect(ctx, x, y, width, height, radius) {
-  ctx.beginPath()
-  ctx.moveTo(x + radius, y)
-  ctx.arcTo(x + width, y, x + width, y + height, radius)
-  ctx.arcTo(x + width, y + height, x, y + height, radius)
-  ctx.arcTo(x, y + height, x, y, radius)
-  ctx.arcTo(x, y, x + width, y, radius)
-  ctx.closePath()
-}
-
 // Shared by both the Download and Share actions, so they always produce
 // identical output rather than each generating the image its own way.
 function canvasToBlob(canvas) {
@@ -132,10 +119,11 @@ function canShareFiles() {
   }
 }
 
-// Renders the quote-share image: selected background (cover-fit) + a dark
-// scrim sized to the text block + the quote (display font) + a smaller
-// attribution line (body font). Re-renders whenever quote, backgroundUrl,
-// or attribution change.
+// Renders the quote-share image: selected background (cover-fit) + the
+// quote (display font) + a smaller attribution line (body font), white
+// text directly on the photo with a soft drop shadow for legibility, no
+// background panel behind it. Re-renders whenever quote, backgroundUrl, or
+// attribution change.
 function QuoteCardCanvas({ quote, backgroundUrl, attribution, bookTitle, bookId, chapterId }) {
   const canvasRef = useRef(null)
   const [isDownloading, setIsDownloading] = useState(false)
@@ -207,22 +195,15 @@ function QuoteCardCanvas({ quote, backgroundUrl, attribution, bookTitle, bookId,
       const totalTextHeight = quoteBlockHeight + (hasAttribution ? ATTRIBUTION_GAP + attributionBlockHeight : 0)
       const textTop = (CANVAS_HEIGHT - totalTextHeight) / 2
 
-      // Scrim behind the text for legibility against any background image,
-      // sized to the actual content rather than a fixed panel, so a short
-      // quote gets a small scrim and more of the background stays visible.
-      ctx.fillStyle = 'rgba(20, 16, 12, 0.45)'
-      drawRoundedRect(
-        ctx,
-        MARGIN_X - SCRIM_PADDING_X,
-        textTop - SCRIM_PADDING_Y,
-        CANVAS_WIDTH - (MARGIN_X - SCRIM_PADDING_X) * 2,
-        totalTextHeight + SCRIM_PADDING_Y * 2,
-        SCRIM_RADIUS,
-      )
-      ctx.fill()
-
       ctx.textAlign = 'center'
       ctx.textBaseline = 'alphabetic'
+
+      // No background panel behind the text anymore - just the white text
+      // directly on the photo. A soft drop shadow (not a solid scrim) is
+      // what keeps it legible against a light or busy patch of the image.
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.55)'
+      ctx.shadowBlur = 14
+      ctx.shadowOffsetY = 2
 
       ctx.font = `700 ${fontSize}px "Space Grotesk", sans-serif`
       ctx.fillStyle = CANVAS_TEXT_COLOR
@@ -234,13 +215,17 @@ function QuoteCardCanvas({ quote, backgroundUrl, attribution, bookTitle, bookId,
 
       if (hasAttribution) {
         ctx.font = `500 ${ATTRIBUTION_FONT_SIZE}px "Inter", sans-serif`
-        ctx.fillStyle = 'rgba(253, 251, 246, 0.8)'
+        ctx.fillStyle = 'rgba(253, 251, 246, 0.85)'
         let attributionCursorY = textTop + quoteBlockHeight + ATTRIBUTION_GAP + ATTRIBUTION_FONT_SIZE * 0.8
         for (const line of attributionLines) {
           ctx.fillText(line, CANVAS_WIDTH / 2, attributionCursorY)
           attributionCursorY += attributionLineHeight
         }
       }
+
+      ctx.shadowColor = 'transparent'
+      ctx.shadowBlur = 0
+      ctx.shadowOffsetY = 0
     }
 
     render()

@@ -36,7 +36,7 @@ function CommentComposer({ parentId = null, onSubmit, submitLabel = 'Post commen
     }
     if (form.question) {
       if (!form.readerEmail.trim()) {
-        return 'Questions for PJK need an email so a reply can reach you.'
+        return 'Questions for Joshua Komolafe need an email so a reply can reach you.'
       }
       if (!EMAIL_PATTERN.test(form.readerEmail.trim())) {
         return 'Please enter a valid email address.'
@@ -124,7 +124,7 @@ function CommentComposer({ parentId = null, onSubmit, submitLabel = 'Post commen
           onChange={(event) => updateField('question', event.target.checked)}
           disabled={submitting}
         />
-        This is a question for PJK
+        This is a question for Joshua Komolafe
       </label>
 
       {form.question && (

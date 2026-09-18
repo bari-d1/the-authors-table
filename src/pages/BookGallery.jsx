@@ -51,14 +51,15 @@ function BookGallery() {
           </h1>
           <div className="mx-auto mt-8 flex max-w-xl flex-col gap-5 font-body text-base leading-relaxed text-ink-muted">
             <p>
-              PJK is publishing six books this spring: on covering, on marriage, on discernment, on
-              delegation, on grief, and on the fear of being seen. This is where you read them chapter
-              by chapter and tell him what you think.
+              Joshua Komolafe is publishing six books this spring: on covering, on marriage, on
+              discernment, on delegation, on grief, and on the fear of being seen. This is where you
+              read them chapter by chapter and tell him what you think.
             </p>
             <p>
               Highlight a line that stays with you and turn it into an image worth sharing. Ask a
-              question beneath the passage that raised it, and PJK reads every one and answers himself.
-              Search a chapter when you're trying to find a phrase you remember but can't place.
+              question beneath the passage that raised it, and Joshua reads every one and answers
+              himself. Search a chapter when you're trying to find a phrase you remember but can't
+              place.
             </p>
             <p>Nothing else lives here. Just the books, and the conversation happening around them.</p>
           </div>
@@ -95,10 +96,11 @@ function BookGallery() {
         ) : (
           <>
             <h2 className="label-tracked mb-16 text-center text-ink">The books</h2>
-            {/* Photo-forward, editorial: two columns at most, generous
-                whitespace between entries, no bordered card chrome - the cover
+            {/* Photo-forward, editorial: three columns at most (smaller
+                covers than a two-column layout gives), generous whitespace
+                between entries, no bordered card chrome - the cover
                 photography and typography carry the weight, not a box. */}
-            <div className="grid grid-cols-1 gap-x-16 gap-y-20 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-x-12 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
               {books.map((book) => (
                 <div key={book.id} className="flex flex-col">
                   {book.cover_url && (

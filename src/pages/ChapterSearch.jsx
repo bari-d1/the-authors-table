@@ -11,7 +11,6 @@ import QuoteFreeTextInput from '../components/QuoteFreeTextInput'
 import { capQuote } from '../lib/capQuote'
 import { useBooks } from '../hooks/useBooks'
 import { useChapterContent } from '../hooks/useChapterContent'
-import { useChapters } from '../hooks/useChapters'
 
 const HIGHLIGHT_DURATION_MS = 2500
 
@@ -34,11 +33,9 @@ function ChapterSearch() {
   const [selectedBackgroundUrl, setSelectedBackgroundUrl] = useState(null)
   const fadeTimerRef = useRef(null)
   const { books } = useBooks()
-  const { chapters } = useChapters(selectedBookId)
   const { content: chapterContent, error: contentError } = useChapterContent(selectedChapterId)
 
   const selectedBook = books?.find((book) => book.id === selectedBookId) ?? null
-  const selectedChapter = chapters?.find((chapter) => chapter.id === selectedChapterId) ?? null
 
   // A chapter selected under one book is meaningless once a different book
   // is chosen, so drop it rather than leaving a stale id from the previous
@@ -57,12 +54,10 @@ function ChapterSearch() {
 
   function handleBookChange(bookId) {
     setSelectedBookId(bookId)
-    console.log('BookSelector selection changed:', bookId)
   }
 
   function handleChapterChange(chapterId) {
     setSelectedChapterId(chapterId)
-    console.log('ChapterSelector selection changed:', chapterId)
   }
 
   function handleResultClick(paragraphIndex) {
@@ -124,22 +119,6 @@ function ChapterSearch() {
             onChange={handleChapterChange}
           />
         </div>
-        <p className="mt-4 font-body text-sm text-ink-muted">
-          Selected book: {selectedBook ? selectedBook.title : 'none'}
-        </p>
-        <p className="mt-1 font-body text-sm text-ink-muted">
-          Selected chapter: {selectedChapter ? `${selectedChapter.number}. ${selectedChapter.title}` : 'none'}
-        </p>
-        <p className="mt-1 font-body text-sm text-ink-muted">
-          Chapter content:{' '}
-          {contentError
-            ? `Couldn't load chapter content: ${contentError}`
-            : selectedChapterId === null
-              ? 'none'
-              : chapterContent === null
-                ? 'Loading…'
-                : `loaded, ${chapterContent.length} characters`}
-        </p>
 
         <div className="mt-6">
           <ChapterSearchBox
@@ -160,22 +139,16 @@ function ChapterSearch() {
 
           <h3 className="mb-2 mt-5 font-body text-sm font-medium text-ink">Background</h3>
           <QuoteBackgroundPicker value={selectedBackgroundUrl} onChange={handleBackgroundChange} />
-          <p className="mt-2 truncate font-body text-xs text-ink-muted">
-            Selected background: {selectedBackgroundUrl ?? 'none'}
-          </p>
 
           <h3 className="mb-2 mt-5 font-body text-sm font-medium text-ink">Preview</h3>
           <QuoteCardCanvas
             quote={selectedQuote}
             backgroundUrl={selectedBackgroundUrl}
-            attribution={selectedBook ? `${selectedBook.title} · by PJK` : null}
+            attribution={selectedBook ? `${selectedBook.title} · by Joshua Komolafe` : null}
             bookTitle={selectedBook?.title}
             bookId={quoteSourceBookId}
             chapterId={quoteSourceChapterId}
           />
-          <p className="mt-2 font-body text-xs text-ink-muted">
-            Will log: book_id={quoteSourceBookId ?? 'null'}, chapter_id={quoteSourceChapterId ?? 'null'}
-          </p>
         </div>
 
         <div className="mt-6">
