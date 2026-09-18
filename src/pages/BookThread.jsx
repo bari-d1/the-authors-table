@@ -1,11 +1,124 @@
-import { useParams } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
+import PillButton from '../components/PillButton'
+import { supabase } from '../lib/supabaseClient'
 
 function BookThread() {
   const { bookId } = useParams()
+  const [book, setBook] = useState(null)
+  const [author, setAuthor] = useState(null)
+  const [notFound, setNotFound] = useState(false)
+  const [error, setError] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function load() {
+      setLoading(true)
+      setError(null)
+      setNotFound(false)
+
+      const [bookResult, authorResult] = await Promise.all([
+        supabase.from('books').select('*').eq('id', bookId).maybeSingle(),
+        supabase.from('author').select('*').maybeSingle(),
+      ])
+
+      if (cancelled) return
+
+      if (bookResult.error || authorResult.error) {
+        setError((bookResult.error || authorResult.error).message)
+        setLoading(false)
+        return
+      }
+
+      if (!bookResult.data) {
+        setNotFound(true)
+        setLoading(false)
+        return
+      }
+
+      setBook(bookResult.data)
+      setAuthor(authorResult.data)
+      setLoading(false)
+    }
+
+    load()
+
+    return () => {
+      cancelled = true
+    }
+  }, [bookId])
+
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-4xl px-6 py-16">
+        <p className="text-center font-body text-ink-muted">Loading book…</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="mx-auto max-w-4xl px-6 py-16">
+        <p className="rounded-2xl border border-border bg-surface px-6 py-8 text-center font-body text-ink">
+          Something went wrong loading this book: {error}
+        </p>
+      </div>
+    )
+  }
+
+  if (notFound) {
+    return (
+      <div className="mx-auto flex max-w-4xl flex-col items-center gap-6 px-6 py-16 text-center">
+        <p className="font-body text-ink-muted">
+          We couldn&apos;t find a book with that id.
+        </p>
+        <PillButton as={Link} to="/" variant="primary">
+          Back to the gallery
+        </PillButton>
+      </div>
+    )
+  }
 
   return (
-    <div>
-      <h1>Book Thread: {bookId}</h1>
+    <div className="mx-auto max-w-4xl px-6 py-16">
+      {/* Book banner */}
+      <section className="flex flex-col items-center gap-6 text-center sm:flex-row sm:items-start sm:text-left">
+        {book.cover_url && (
+          <img
+            src={book.cover_url}
+            alt={`Cover of ${book.title}`}
+            className="w-40 shrink-0 rounded-xl border border-border object-cover sm:w-48"
+          />
+        )}
+        <div className="flex flex-col gap-2">
+          <h1 className="font-display text-3xl font-bold text-ink">{book.title}</h1>
+          {author && <p className="font-body text-ink-muted">by {author.name}</p>}
+        </div>
+      </section>
+
+      {/* Author section, visually distinct from the banner above */}
+      {author && (
+        <section className="mt-10 flex flex-col items-center gap-4 rounded-2xl border border-border bg-surface p-6 text-center sm:flex-row sm:items-center sm:gap-6 sm:text-left">
+          {author.photo_url && (
+            <img
+              src={author.photo_url}
+              alt={author.name}
+              className="h-20 w-20 shrink-0 rounded-full border border-border object-cover"
+            />
+          )}
+          <div className="flex flex-col gap-1">
+            <p className="font-display text-base font-bold text-ink">{author.name}</p>
+            {author.bio && <p className="font-body text-sm text-ink-muted">{author.bio}</p>}
+          </div>
+        </section>
+      )}
+
+      {/* Placeholder for the comment thread, built in a later piece of work */}
+      <section className="mt-10 rounded-2xl border border-dashed border-border px-6 py-12 text-center">
+        <p className="font-body text-sm text-ink-muted">Discussion thread coming soon</p>
+      </section>
     </div>
   )
 }
