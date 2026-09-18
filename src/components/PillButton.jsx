@@ -8,7 +8,7 @@ function PillButton({ as: Component = 'button', variant = 'primary', className =
 
   return (
     <Component
-      className={`inline-flex items-center justify-center rounded-pill px-5 py-2 font-body text-sm font-medium transition-colors ${variantClasses} ${className}`}
+      className={`inline-flex items-center justify-center rounded-pill px-5 py-2 font-body text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:opacity-50 ${variantClasses} ${className}`}
       {...props}
     />
   )
