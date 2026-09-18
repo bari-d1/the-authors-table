@@ -1,4 +1,6 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { buildQuoteFilename } from '../lib/buildQuoteFilename'
+import PillButton from './PillButton'
 
 // Fixed output size for social sharing (4:5 portrait, an Instagram-friendly
 // size). The <canvas> element's width/height attributes below are this
@@ -105,8 +107,15 @@ function drawRoundedRect(ctx, x, y, width, height, radius) {
 // scrim sized to the text block + the quote (display font) + a smaller
 // attribution line (body font). Re-renders whenever quote, backgroundUrl,
 // or attribution change.
-function QuoteCardCanvas({ quote, backgroundUrl, attribution }) {
+function QuoteCardCanvas({ quote, backgroundUrl, attribution, bookTitle }) {
   const canvasRef = useRef(null)
+  const [isDownloading, setIsDownloading] = useState(false)
+  // A ref, not just the state above: state updates are batched/async, so
+  // two clicks dispatched before React re-renders (a fast real double-click
+  // can land inside that window) would both still read isDownloading as
+  // false from the same stale render. The ref reads/writes synchronously,
+  // so the second call sees the first one's guard immediately.
+  const isDownloadingRef = useRef(false)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -208,13 +217,62 @@ function QuoteCardCanvas({ quote, backgroundUrl, attribution }) {
     }
   }, [quote, backgroundUrl, attribution])
 
+  const hasQuote = Boolean((quote ?? '').trim())
+
+  async function handleDownload() {
+    if (isDownloadingRef.current) return
+
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    isDownloadingRef.current = true
+    setIsDownloading(true)
+    try {
+      const blob = await new Promise((resolve, reject) => {
+        canvas.toBlob((result) => {
+          if (result) resolve(result)
+          else reject(new Error('Canvas produced no image data'))
+        }, 'image/png')
+      })
+
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = buildQuoteFilename(bookTitle)
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      // Revoked on a short delay rather than immediately after click - some
+      // mobile browsers (iOS Safari in particular) handle the download
+      // asynchronously, and revoking the URL too early can break it.
+      setTimeout(() => URL.revokeObjectURL(url), 1000)
+    } catch (err) {
+      console.error('QuoteCardCanvas: download failed', err)
+    } finally {
+      isDownloadingRef.current = false
+      setIsDownloading(false)
+    }
+  }
+
   return (
-    <canvas
-      ref={canvasRef}
-      width={CANVAS_WIDTH}
-      height={CANVAS_HEIGHT}
-      className="mx-auto w-full max-w-xs rounded-2xl border border-border shadow-md"
-    />
+    <div>
+      <canvas
+        ref={canvasRef}
+        width={CANVAS_WIDTH}
+        height={CANVAS_HEIGHT}
+        className="mx-auto w-full max-w-xs rounded-2xl border border-border shadow-md"
+      />
+      <div className="mt-4 flex justify-center">
+        <PillButton
+          type="button"
+          variant="primary"
+          onClick={handleDownload}
+          disabled={!hasQuote || isDownloading}
+        >
+          {isDownloading ? 'Preparing…' : 'Download'}
+        </PillButton>
+      </div>
+    </div>
   )
 }
 

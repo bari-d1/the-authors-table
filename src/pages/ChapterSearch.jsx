@@ -155,6 +155,7 @@ function ChapterSearch() {
             quote={selectedQuote}
             backgroundUrl={selectedBackgroundUrl}
             attribution={selectedBook ? `${selectedBook.title} · by PJK` : null}
+            bookTitle={selectedBook?.title}
           />
         </div>
 
