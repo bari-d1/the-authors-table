@@ -2,15 +2,24 @@ import { useEffect, useState } from 'react'
 import { buildCommentTree } from '../lib/commentTree'
 import { supabase } from '../lib/supabaseClient'
 import CommentItem from './CommentItem'
+import PillButton from './PillButton'
 
 function CommentList({ bookId, onSubmitReply }) {
   const [comments, setComments] = useState(null)
   const [error, setError] = useState(null)
   const [openReplyId, setOpenReplyId] = useState(null)
+  const [filter, setFilter] = useState('all')
 
   function handleToggleReply(commentId) {
     setOpenReplyId((current) => (current === commentId ? null : commentId))
   }
+
+  // Explicit reset (rather than relying on the parent page's loading-state
+  // branching to remount this component) so the filter never carries over
+  // from one book's thread to another's.
+  useEffect(() => {
+    setFilter('all')
+  }, [bookId])
 
   useEffect(() => {
     let cancelled = false
@@ -121,18 +130,48 @@ function CommentList({ bookId, onSubmitReply }) {
     )
   }
 
+  // Only the top-level flag decides inclusion; a qualifying question's full
+  // reply chain (including replies that aren't themselves questions) comes
+  // along with it since children are already nested inside each root node.
+  const visibleTree = filter === 'questions' ? tree.filter((comment) => comment.question) : tree
+
   return (
-    <ul>
-      {tree.map((comment) => (
-        <CommentItem
-          key={comment.id}
-          comment={comment}
-          openReplyId={openReplyId}
-          onToggleReply={handleToggleReply}
-          onSubmitReply={onSubmitReply}
-        />
-      ))}
-    </ul>
+    <div>
+      <div className="mb-4 flex gap-2">
+        <PillButton
+          type="button"
+          variant={filter === 'all' ? 'primary' : 'secondary'}
+          onClick={() => setFilter('all')}
+        >
+          All comments
+        </PillButton>
+        <PillButton
+          type="button"
+          variant={filter === 'questions' ? 'primary' : 'secondary'}
+          onClick={() => setFilter('questions')}
+        >
+          Questions for the author
+        </PillButton>
+      </div>
+
+      {visibleTree.length === 0 ? (
+        <p className="rounded-2xl border border-border bg-surface px-6 py-8 text-center font-body text-ink-muted">
+          No questions for the author yet.
+        </p>
+      ) : (
+        <ul>
+          {visibleTree.map((comment) => (
+            <CommentItem
+              key={comment.id}
+              comment={comment}
+              openReplyId={openReplyId}
+              onToggleReply={handleToggleReply}
+              onSubmitReply={onSubmitReply}
+            />
+          ))}
+        </ul>
+      )}
+    </div>
   )
 }
 
